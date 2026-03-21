@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { trackGeneratorClick } from '../utils/tracking';
 import { geminiService } from '../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
-import { Loader2, Wand2, Save, Copy, Check, Layers } from 'lucide-react';
+import { Loader2, Wand2, Copy, Check, Layers } from 'lucide-react';
 import { motion } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -12,11 +13,11 @@ export function OmnichannelCampaignGenerator() {
     productDetails: ''
   });
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState<string | null>(null);
 
   const handleGenerate = async () => {
+    trackGeneratorClick('campaign-generator');
     setLoading(true);
     try {
       if (!auth.currentUser) {
@@ -47,26 +48,6 @@ export function OmnichannelCampaignGenerator() {
       alert("Error generating campaign. Check console.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const saveToLibrary = async () => {
-    if (!auth.currentUser || !result) return;
-    setSaving(true);
-    try {
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'omnichannel',
-        title: `Campaign: ${result.coreCampaignFoundation?.bigIdea?.substring(0, 30)}...`,
-        content: result,
-        metadata: { generatedAt: new Date().toISOString() },
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -131,14 +112,6 @@ export function OmnichannelCampaignGenerator() {
               <Layers className="w-6 h-6 text-indigo-500" />
               Your Campaign
             </h3>
-            <button
-              onClick={saveToLibrary}
-              disabled={saving}
-              className="flex items-center gap-2 px-6 py-3 bg-cyan-600/20 text-cyan-500 hover:bg-cyan-600/30 rounded-xl transition-colors font-medium border border-cyan-500/30"
-            >
-              {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-              Save Campaign
-            </button>
           </div>
 
           <div className="space-y-12">

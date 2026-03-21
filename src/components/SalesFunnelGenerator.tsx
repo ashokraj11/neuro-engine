@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { geminiService } from '../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, limit } from 'firebase/firestore';
-import { Loader2, Funnel, Link as LinkIcon, TypeIcon, Save, Copy, Check } from 'lucide-react';
+import { Loader2, Funnel, Link as LinkIcon, TypeIcon, Copy, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion } from 'motion/react';
@@ -15,7 +15,6 @@ export function SalesFunnelGenerator() {
     funnelType: 'Lead Generation'
       });
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [brandVoice, setBrandVoice] = useState<any>(null);
@@ -29,7 +28,6 @@ export function SalesFunnelGenerator() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setBrandVoice(docSnap.data());
-          setUseBrandVoice(true);
         }
       } catch (error) {
         console.error("Error fetching brand voice:", error);
@@ -51,6 +49,7 @@ export function SalesFunnelGenerator() {
   ];
 
   const handleGenerate = async () => {
+    trackGeneratorClick('sales-funnel-generator');
     if (!formData.productDetails && !formData.url) {
       alert("Please provide either a URL or Product Details.");
       return;
@@ -74,26 +73,6 @@ export function SalesFunnelGenerator() {
       alert("Error generating sales funnel. Check console.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const saveToLibrary = async () => {
-    if (!result || !auth.currentUser) return;
-    setSaving(true);
-    try {
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'sales-funnel',
-        title: formData.productDetails.substring(0, 30) || 'Sales Funnel',
-        content: result,
-        metadata: formData,
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -182,14 +161,6 @@ export function SalesFunnelGenerator() {
               >
                 {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                 Copy
-              </button>
-              <button
-                onClick={saveToLibrary}
-                disabled={saving}
-                className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors text-xs font-medium"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Save
               </button>
             </div>
           )}

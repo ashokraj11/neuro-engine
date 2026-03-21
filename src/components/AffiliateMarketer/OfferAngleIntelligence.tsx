@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { geminiService } from '../../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
-import { Loader2, Wand2, Save, Copy, Check, Lightbulb, FileText } from 'lucide-react';
+import { Loader2, Wand2, Copy, Check, Lightbulb, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { BrandVoiceToggle } from '../BrandVoiceToggle';
 
@@ -12,7 +12,6 @@ export function OfferAngleIntelligence() {
     productDetails: ''
       });
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState<number | null>(null);
   const [brandVoice, setBrandVoice] = useState<{ tone: string, examples: string } | null>(null);
@@ -26,7 +25,6 @@ export function OfferAngleIntelligence() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setBrandVoice(docSnap.data() as any);
-          setUseBrandVoice(true);
         }
       } catch (error) {
         console.error("Error fetching brand voice:", error);
@@ -59,26 +57,6 @@ export function OfferAngleIntelligence() {
       alert("Error generating offer angles. Check console.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const saveToLibrary = async (angle: any) => {
-    if (!auth.currentUser) return;
-    setSaving(true);
-    try {
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'offer-angle',
-        title: angle.title,
-        content: angle,
-        metadata: formData,
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -161,9 +139,6 @@ export function OfferAngleIntelligence() {
                   <div className="flex gap-2">
                     <button onClick={() => copyToClipboard(angle.hook, index)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
                       {copied === index ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                    <button onClick={() => saveToLibrary(angle)} disabled={saving} className="text-[var(--text-secondary)] hover:text-emerald-500">
-                      <Save className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

@@ -19,5 +19,8 @@ export const MODULE_LIST = [
   { id: 'competitor-intelligence', name: 'Competitor Intelligence', icon: Target, category: 'affiliate' },
   { id: 'learning', name: 'Learning', icon: BookOpen, category: 'other' },
   { id: 'brand-voice', name: 'Brand Voice DNA', icon: Brain, category: 'other' },
+  { id: 'privacy-policy', name: 'Privacy Policy', icon: ShieldCheck, category: 'legal' },
+  { id: 'terms-conditions', name: 'Terms & Conditions', icon: ShieldCheck, category: 'legal' },
+  { id: 'contact-us', name: 'Contact Us', icon: Mail, category: 'legal' },
   { id: 'admin', name: 'Admin', icon: ShieldCheck, category: 'other', adminOnly: true },
 ];

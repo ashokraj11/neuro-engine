@@ -527,12 +527,13 @@ export const geminiService = {
       STRUCTURE
       - Niche: The broad market category.
       - Sub-niche: A specific, profitable segment within the niche.
-      - Buyer Persona:
-        - Demographics
-        - Psychographics
-        - Pain Points
-        - Goals/Desires
-        - Buying Triggers
+      - Target Audience Description: Who are you trying to reach?
+      - Persona Name: A catchy name for the persona.
+      - Deep-Seated Fears: What keeps them up at night?
+      - Secret Desires: What do they truly want but rarely admit?
+      - Jobs to be Done: What specific outcomes are they trying to achieve?
+      - Specific Vocabulary: What words, slang, or industry jargon do they use?
+      - Psychological Triggers: What emotional hooks work best on them?
       
       Return as structured JSON.
     `;
@@ -552,19 +553,15 @@ export const geminiService = {
           properties: {
             niche: { type: Type.STRING },
             subNiche: { type: Type.STRING },
-            buyerPersona: {
-              type: Type.OBJECT,
-              properties: {
-                demographics: { type: Type.STRING },
-                psychographics: { type: Type.STRING },
-                painPoints: { type: Type.ARRAY, items: { type: Type.STRING } },
-                goals: { type: Type.ARRAY, items: { type: Type.STRING } },
-                buyingTriggers: { type: Type.ARRAY, items: { type: Type.STRING } }
-              },
-              required: ["demographics", "psychographics", "painPoints", "goals", "buyingTriggers"]
-            }
+            targetAudienceDescription: { type: Type.STRING },
+            personaName: { type: Type.STRING },
+            fears: { type: Type.STRING },
+            desires: { type: Type.STRING },
+            jobsToBeDone: { type: Type.STRING },
+            vocabulary: { type: Type.STRING },
+            psychologicalTriggers: { type: Type.STRING }
           },
-          required: ["niche", "subNiche", "buyerPersona"]
+          required: ["niche", "subNiche", "targetAudienceDescription", "personaName", "fears", "desires", "jobsToBeDone", "vocabulary", "psychologicalTriggers"]
         }
       }
     }, TEXT_MODELS);

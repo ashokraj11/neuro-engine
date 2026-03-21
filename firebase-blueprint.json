@@ -17,18 +17,17 @@
     },
     "MarketingAsset": {
       "title": "Marketing Asset",
-      "description": "A generated marketing asset (blog, reel, or ad set).",
+      "description": "A generated marketing asset.",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "userId": { "type": "string" },
-        "type": { "type": "string", "enum": ["blog", "reel", "ads"] },
-        "title": { "type": "string" },
-        "content": { "type": "object", "description": "The actual generated data" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "metadata": { "type": "object", "description": "Input parameters used for generation" }
+        "userId": { "type": "string", "description": "The UID of the user who owns the asset." },
+        "type": { "type": "string", "description": "The type of the asset (e.g., blog, reel, ads, email, landing, etc.)." },
+        "title": { "type": "string", "description": "The title of the asset." },
+        "content": { "type": "object", "description": "The content of the asset (can be a map or a list)." },
+        "metadata": { "type": "object", "description": "Additional metadata for the asset." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the asset was created." }
       },
-      "required": ["userId", "type", "content", "createdAt"]
+      "required": ["userId", "type", "title", "content", "createdAt"]
     },
     "Course": {
       "title": "Learning Course",
@@ -112,6 +111,18 @@
         "psychologicalTriggers": { "type": "string" },
         "updatedAt": { "type": "string", "format": "date-time" }
       }
+    },
+    "AdConfig": {
+      "title": "Ad Placement Configuration",
+      "description": "Controls the visibility of AdSense placements.",
+      "type": "object",
+      "properties": {
+        "placementId": { "type": "string" },
+        "name": { "type": "string" },
+        "isVisible": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["placementId", "name", "isVisible"]
     }
   },
   "firestore": {
@@ -146,6 +157,10 @@
     "/blog/{postId}": {
       "schema": "BlogPost",
       "description": "Blog posts"
+    },
+    "/ad_config/{placementId}": {
+      "schema": "AdConfig",
+      "description": "Global ad placement settings"
     }
   }
 }

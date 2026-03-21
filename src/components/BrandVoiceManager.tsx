@@ -33,7 +33,12 @@ export function BrandVoiceManager() {
         const docRef = doc(db, 'users', auth.currentUser.uid, 'settings', 'brandVoice');
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setVoiceData(docSnap.data() as any);
+          const data = docSnap.data();
+          setVoiceData(prev => ({
+            ...prev,
+            ...data,
+            colors: data.colors || prev.colors,
+          }));
         }
       } catch (error) {
         console.error("Error fetching brand voice:", error);
@@ -72,7 +77,7 @@ export function BrandVoiceManager() {
   };
 
   const handleColorChange = (index: number, value: string) => {
-    const newColors = [...voiceData.colors];
+    const newColors = [...(voiceData.colors || ['', '', ''])];
     newColors[index] = value;
     setVoiceData(prev => ({ ...prev, colors: newColors }));
   };
@@ -210,15 +215,40 @@ export function BrandVoiceManager() {
 
               <div>
                 <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                  Tone Description (e.g., Professional, Witty, Authoritative)
+                  Tone Description
                 </label>
-                <input
-                  type="text"
+                <select
                   value={voiceData.tone}
                   onChange={(e) => setVoiceData({ ...voiceData, tone: e.target.value })}
                   className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none transition-all text-[var(--text-primary)]"
-                  placeholder="e.g., Professional, Witty, Authoritative"
-                />
+                >
+                  <option value="">Select a tone...</option>
+                  <option value="Professional">Professional</option>
+                  <option value="Witty">Witty</option>
+                  <option value="Authoritative">Authoritative</option>
+                  <option value="Conversational">Conversational</option>
+                  <option value="Enthusiastic">Enthusiastic</option>
+                  <option value="Empathetic">Empathetic</option>
+                  <option value="Direct">Direct</option>
+                  <option value="Playful">Playful</option>
+                  <option value="Inspirational">Inspirational</option>
+                  <option value="Educational">Educational</option>
+                  <option value="Urgent">Urgent</option>
+                  <option value="Casual">Casual</option>
+                  <option value="Formal">Formal</option>
+                  <option value="Sarcastic">Sarcastic</option>
+                  <option value="Humorous">Humorous</option>
+                  <option value="Persuasive">Persuasive</option>
+                  <option value="Trustworthy">Trustworthy</option>
+                  <option value="Bold">Bold</option>
+                  <option value="Friendly">Friendly</option>
+                  <option value="Luxury">Luxury</option>
+                  <option value="Rebellious">Rebellious</option>
+                  <option value="Nostalgic">Nostalgic</option>
+                  <option value="Quirky">Quirky</option>
+                  <option value="Data-Driven">Data-Driven</option>
+                  <option value="Storytelling">Storytelling</option>
+                </select>
               </div>
 
               <div>

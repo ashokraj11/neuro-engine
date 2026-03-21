@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
+import { trackGeneratorClick } from '../utils/tracking';
 import { geminiService } from '../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import { Loader2, FileText, Globe, Link as LinkIcon, Hash, Type as TypeIcon, AlignLeft, Download, Save, Image as ImageIcon } from 'lucide-react';
+import { Loader2, FileText, Globe, Link as LinkIcon, Hash, Type as TypeIcon, AlignLeft, Download, Image as ImageIcon } from 'lucide-react';
 import { downloadImage } from '../lib/utils';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
+import { AdSense } from './AdSense';
 
 export function BlogGenerator() {
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState<'idle' | 'writing' | 'visualizing' | 'ready'>('idle');
@@ -35,7 +36,6 @@ export function BlogGenerator() {
         const data = userDoc.data();
         if (data) {
           setBrandVoice(data as any);
-          setUseBrandVoice(true);
         }
       } catch (error) {
         console.error("Error fetching brand voice:", error);
@@ -45,6 +45,7 @@ export function BlogGenerator() {
   }, []);
 
   const handleGenerate = async () => {
+    trackGeneratorClick('blog-generator');
     setLoading(true);
     setResult(null);
     setImages([]);
@@ -102,26 +103,6 @@ export function BlogGenerator() {
     } finally {
       setLoading(false);
       if (currentStep !== 'ready') setCurrentStep('idle');
-    }
-  };
-
-  const saveToLibrary = async () => {
-    if (!result || !auth.currentUser) return;
-    setSaving(true);
-    try {
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'blog',
-        title: formData.primaryKeyword || 'Untitled Blog',
-        content: { markdown: result }, // Removed images to avoid Firestore size limits
-        metadata: { ...formData, imageCount: images.length },
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library (metadata only)!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -264,15 +245,6 @@ export function BlogGenerator() {
             {result && (
               <>
                 <button 
-                  onClick={saveToLibrary}
-                  disabled={saving}
-                  className="p-2 hover:bg-emerald-950/50 rounded-lg transition-colors flex items-center gap-2 text-emerald-400 font-medium text-sm"
-                  title="Save to Library"
-                >
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  Save
-                </button>
-                <button 
                   onClick={() => {
                     const blob = new Blob([result], { type: 'text/markdown' });
                     const url = URL.createObjectURL(blob);
@@ -316,6 +288,9 @@ export function BlogGenerator() {
                   </div>
                 </div>
               )}
+              
+              {/* Ad Slot after content */}
+              <AdSense adSlot="BLOG_RESULT_BOTTOM" className="mt-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] p-4 rounded-xl" />
             </div>
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-[var(--text-secondary)] space-y-4">

@@ -3,7 +3,7 @@ import { geminiService } from '../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { doc, getDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { compileVideo } from '../lib/videoCompiler';
-import { Loader2, Video, Play, Music, Type, Image as ImageIcon, Download, Save, Globe, AlignLeft, Sparkles } from 'lucide-react';
+import { Loader2, Video, Play, Music, Type, Image as ImageIcon, Download, Globe, AlignLeft, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { downloadImage } from '../lib/utils';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
@@ -19,7 +19,6 @@ interface Scene {
 
 export function ReelsGenerator() {
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [compiling, setCompiling] = useState(false);
   const [url, setUrl] = useState('');
   const [details, setDetails] = useState('');
@@ -41,34 +40,6 @@ export function ReelsGenerator() {
     };
     fetchBrandVoice();
   }, []);
-
-  const saveToLibrary = async () => {
-    if (scenes.length === 0 || !auth.currentUser) return;
-    setSaving(true);
-    try {
-      // Strip base64 data to avoid Firestore size limits
-      const scenesWithoutMedia = scenes.map(s => ({
-        scene: s.scene,
-        visualPrompt: s.visualPrompt,
-        voiceover: s.voiceover,
-        caption: s.caption
-      }));
-
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'reel',
-        title: url || details.slice(0, 30) + '...',
-        content: { scenes: scenesWithoutMedia },
-        metadata: { url, details, sceneCount },
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library (metadata only)!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const playAudio = (url: string) => {
     const audio = new Audio(url);
@@ -94,6 +65,7 @@ export function ReelsGenerator() {
   };
 
   const handleGenerate = async () => {
+    trackGeneratorClick('reels-generator');
     // Check for API key selection if using paid models
     if (typeof window !== 'undefined' && window.aistudio) {
       const hasKey = await window.aistudio.hasSelectedApiKey();
@@ -199,16 +171,6 @@ export function ReelsGenerator() {
                 NEURODIGITAL ENGINE ACTIVE
               </span>
             </h2>
-            {currentStep === 'ready' && (
-              <button 
-                onClick={saveToLibrary}
-                disabled={saving}
-                className="p-2 hover:bg-indigo-950/50 rounded-lg transition-colors flex items-center gap-2 text-indigo-400 font-medium text-sm"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Save
-              </button>
-            )}
           </div>
           
           <div className="space-y-4">

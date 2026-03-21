@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { trackGeneratorClick } from '../utils/tracking';
 import { geminiService } from '../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
-import { Loader2, Share2, Type, Link as LinkIcon, Hash, Image as ImageIcon, Layout, Globe, Sparkles, Plus, Trash2, Download, Copy, Check, Save, List, Target, MessageSquare } from 'lucide-react';
+import { Loader2, Share2, Type, Link as LinkIcon, Hash, Image as ImageIcon, Layout, Globe, Sparkles, Plus, Trash2, Download, Copy, Check, List, Target, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
 
@@ -37,7 +38,6 @@ export function SocialMediaPostGenerator() {
   const [loadingTopics, setLoadingTopics] = useState(false);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState<number | null>(null);
   const [brandVoice, setBrandVoice] = useState<{ tone: string, examples: string } | null>(null);
   const [useBrandVoice, setUseBrandVoice] = useState(false);
@@ -97,6 +97,7 @@ export function SocialMediaPostGenerator() {
   };
 
   const handleGeneratePosts = async () => {
+    trackGeneratorClick('social-media-post-generator');
     setLoadingPosts(true);
     setPosts([]);
     try {
@@ -136,28 +137,6 @@ export function SocialMediaPostGenerator() {
     setSelectedTopics(prev => 
       prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]
     );
-  };
-
-  const saveToLibrary = async (post: Post) => {
-    if (!auth.currentUser) return;
-    setSaving(true);
-    try {
-      // Strip imageUrl to avoid Firestore size limits
-      const { imageUrl, ...postWithoutMedia } = post;
-
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'social-post',
-        title: post.topic,
-        content: postWithoutMedia,
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library (metadata only)!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
-    }
   };
 
   const copyPost = (post: Post, index: number) => {
@@ -381,9 +360,6 @@ export function SocialMediaPostGenerator() {
                     <div className="flex gap-2">
                       <button onClick={() => copyPost(post, idx)} className="p-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors">
                         {copied === idx ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-[var(--text-secondary)]" />}
-                      </button>
-                      <button onClick={() => saveToLibrary(post)} className="p-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors">
-                        <Save className="w-4 h-4 text-[var(--text-secondary)]" />
                       </button>
                     </div>
                   </div>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { trackGeneratorClick } from '../utils/tracking';
 import { geminiService } from '../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { doc, getDoc, addDoc, collection, serverTimestamp, query, where, getDocs, limit } from 'firebase/firestore';
-import { Loader2, Megaphone, Globe, AlignLeft, Copy, Check, Sparkles, Image as ImageIcon, Video, Save, ThumbsUp, MessageCircle, Share2, Download } from 'lucide-react';
+import { Loader2, Megaphone, Globe, AlignLeft, Copy, Check, Sparkles, Image as ImageIcon, Video, ThumbsUp, MessageCircle, Share2, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { downloadImage } from '../lib/utils';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
@@ -20,7 +21,6 @@ interface AdSet {
 
 export function AdsGenerator() {
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [url, setUrl] = useState('');
   const [details, setDetails] = useState('');
   const [ads, setAds] = useState<AdSet[]>([]);
@@ -40,7 +40,6 @@ export function AdsGenerator() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setBrandVoice(docSnap.data());
-          setUseBrandVoice(true);
         }
       } catch (error) {
         console.error("Error fetching brand voice:", error);
@@ -49,38 +48,8 @@ export function AdsGenerator() {
     fetchBrandVoice();
   }, []);
 
-  const saveToLibrary = async () => {
-    if (ads.length === 0 || !auth.currentUser) return;
-    setSaving(true);
-    try {
-      // Strip base64 data to avoid Firestore size limits
-      const adsWithoutMedia = ads.map(a => ({
-        angle: a.angle,
-        primaryText: a.primaryText,
-        headline: a.headline,
-        description: a.description,
-        cta: a.cta,
-        imagePrompt: a.imagePrompt,
-        frameworkLogic: a.frameworkLogic
-      }));
-
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'ads',
-        title: url || details.slice(0, 30) + '...',
-        content: { ads: adsWithoutMedia },
-        metadata: { url, details, mode, style, aspectRatio },
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library (metadata only)!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleGenerate = async () => {
+    trackGeneratorClick('ads-generator');
     setLoading(true);
     setAds([]);
     try {
@@ -147,16 +116,6 @@ export function AdsGenerator() {
               NEURODIGITAL ENGINE ACTIVE
             </span>
           </h2>
-          {ads.length > 0 && (
-            <button 
-              onClick={saveToLibrary}
-              disabled={saving}
-              className="p-2 hover:bg-orange-950/50 rounded-lg transition-colors flex items-center gap-2 text-orange-400 font-medium text-sm"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Save
-            </button>
-          )}
         </div>
         
         <div className="space-y-4">

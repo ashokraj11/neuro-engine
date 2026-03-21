@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { geminiService } from '../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, limit } from 'firebase/firestore';
-import { Loader2, LayoutTemplate, Link as LinkIcon, TypeIcon, Save, Copy, Check, Eye, Download, X, Layout } from 'lucide-react';
+import { Loader2, LayoutTemplate, Link as LinkIcon, TypeIcon, Copy, Check, Eye, Download, X, Layout } from 'lucide-react';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
 import { landingPageTemplates } from '../utils/htmlTemplates';
 
@@ -12,7 +12,6 @@ export function LandingPageGenerator() {
     productDetails: ''
       });
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -32,7 +31,6 @@ export function LandingPageGenerator() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setBrandVoice(docSnap.data());
-          setUseBrandVoice(true);
         }
       } catch (error) {
         console.error("Error fetching brand voice:", error);
@@ -77,6 +75,7 @@ export function LandingPageGenerator() {
   ];
 
   const handleGenerate = async () => {
+    trackGeneratorClick('landing-page-generator');
     if (!formData.productDetails && !formData.url) {
       alert("Please provide either a URL or Product Details.");
       return;
@@ -112,33 +111,6 @@ export function LandingPageGenerator() {
   const handleNext = () => {
     setThemeIndex((prev) => (prev + 1) % themes.length);
     handleGenerate();
-  };
-
-  const saveToLibrary = async () => {
-    if (!result || !auth.currentUser) return;
-    setSaving(true);
-    try {
-      // Truncate content to avoid Firestore size limits
-      const truncatedContent = {
-        ...result,
-        problemAgitation: result.problemAgitation.substring(0, 500000) + (result.problemAgitation.length > 500000 ? '... [Truncated]' : ''),
-        solutionPresentation: result.solutionPresentation.substring(0, 500000) + (result.solutionPresentation.length > 500000 ? '... [Truncated]' : '')
-      };
-
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'landing',
-        title: formData.productDetails.substring(0, 30) || 'Landing Page Copy',
-        content: truncatedContent,
-        metadata: formData,
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library (content may be truncated if too large)!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
-    }
   };
 
   const copyToClipboard = () => {
@@ -347,14 +319,6 @@ Final CTA: ${result.finalCTA}
               >
                 {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                 Copy
-              </button>
-              <button
-                onClick={saveToLibrary}
-                disabled={saving}
-                className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors text-xs font-medium"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Save
               </button>
             </div>
             <div className="flex items-center gap-1 bg-[var(--bg-primary)] p-1 rounded-lg border border-[var(--border-color)]">

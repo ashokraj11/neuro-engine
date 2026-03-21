@@ -15,6 +15,9 @@ import { OfferAngleIntelligence } from './components/AffiliateMarketer/OfferAngl
 import { AdPolicyChecker } from './components/AffiliateMarketer/AdPolicyChecker';
 import { CompetitorIntelligence } from './components/AffiliateMarketer/CompetitorIntelligence';
 import { BrandVoiceManager } from './components/BrandVoiceManager';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { TermsAndConditions } from './components/TermsAndConditions';
+import { ContactUs } from './components/ContactUs';
 import { LearningModule } from './components/LearningModule';
 import { AdminModule } from './components/AdminModule';
 import { Dashboard } from './components/Dashboard';
@@ -23,6 +26,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { SettingsModal } from './components/SettingsModal';
 import { SupportChatbot } from './components/SupportChatbot';
 import { ApiKeyReminder } from './components/ApiKeyReminder';
+import { AdSense } from './components/AdSense';
 import { ThemeProvider } from './context/ThemeContext';
 import { ThemeToggle } from './components/ThemeToggle';
 import { auth, loginWithGoogle, logout, db, handleFirestoreError, OperationType } from './firebase';
@@ -39,7 +43,13 @@ interface ModuleVisibility {
   visibleForUsers: string[];
 }
 
-type Module = 'dashboard' | 'niche' | 'blog' | 'social-media' | 'reels' | 'ads' | 'email' | 'whatsapp' | 'landing' | 'sales-funnel' | 'lead-magnet' | 'learning' | 'admin' | 'bridge-page' | 'offer-angle' | 'ad-policy' | 'competitor-intelligence' | 'brand-voice' | 'omnichannel';
+interface AdConfig {
+  placementId: string;
+  isVisible: boolean;
+  name: string;
+}
+
+type Module = 'dashboard' | 'niche' | 'blog' | 'social-media' | 'reels' | 'ads' | 'email' | 'whatsapp' | 'landing' | 'sales-funnel' | 'lead-magnet' | 'learning' | 'admin' | 'bridge-page' | 'offer-angle' | 'ad-policy' | 'competitor-intelligence' | 'brand-voice' | 'omnichannel' | 'privacy-policy' | 'terms-conditions' | 'contact-us';
 
 function LoginScreen() {
   const [loading, setLoading] = useState(false);
@@ -58,16 +68,16 @@ function LoginScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center justify-center p-4">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-[var(--bg-secondary)] p-10 rounded-3xl shadow-2xl border border-[var(--border-color)] text-center neon-border"
+        className="max-w-md w-full bg-[var(--bg-secondary)] p-10 rounded-3xl shadow-2xl border border-[var(--border-color)] text-center neon-border z-10"
       >
         <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_20px_rgba(0,243,255,0.4)]">
           <Brain className="w-10 h-10 text-[var(--neon-cyan,white)]" />
         </div>
-        <h1 className="text-3xl font-bold mb-2 neon-text-gradient">Neuro Engine</h1>
+        <h1 className="text-3xl font-bold mb-2 neon-text-gradient">Neuro Engine AI</h1>
         <p className="text-[var(--text-secondary)] mb-8">
           {isSignUp 
             ? "Create your account to start generating high-converting assets." 
@@ -96,6 +106,32 @@ function LoginScreen() {
           </p>
         </div>
       </motion.div>
+
+      {/* SEO Content Section (Visible to Crawlers) */}
+      <section className="mt-16 max-w-4xl w-full grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-white">Neuromarketing AI</h2>
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            Leverage advanced psychological triggers to create content that resonates with the subconscious mind and drives action.
+          </p>
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-white">SEO Optimized</h2>
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            Generate high-ranking articles and ad copies designed to dominate search results and answer engine queries.
+          </p>
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-white">Affiliate Ready</h2>
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            Specialized tools for bridge pages, offer angles, and competitor intelligence to scale your affiliate marketing business.
+          </p>
+        </div>
+      </section>
+
+      <footer className="mt-16 text-[var(--text-secondary)] text-xs">
+        <p>© 2026 Neuro Engine AI. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
@@ -121,6 +157,26 @@ function AppContent() {
   const [isGeneratorsOpen, setIsGeneratorsOpen] = useState(true);
   const [isAffiliateOpen, setIsAffiliateOpen] = useState(true);
   const [moduleVisibility, setModuleVisibility] = useState<ModuleVisibility[]>([]);
+  const [adConfigs, setAdConfigs] = useState<AdConfig[]>([]);
+
+  const handleShareApp = async () => {
+    const shareData = {
+      title: 'Neuro Engine AI',
+      text: 'Check out Neuro Engine AI - The ultimate marketing architect!',
+      url: window.location.origin,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.origin);
+        alert('App link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -134,7 +190,20 @@ function AppContent() {
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, 'module_visibility');
     });
-    return () => unsubscribe();
+    const qAdConfigs = query(collection(db, 'ad_config'));
+    const unsubscribeAdConfigs = onSnapshot(qAdConfigs, (snapshot) => {
+      setAdConfigs(snapshot.docs.map(doc => ({
+        placementId: doc.id,
+        ...doc.data()
+      } as AdConfig)));
+    }, (error) => {
+      console.error("Error fetching ad configs:", error);
+    });
+
+    return () => {
+      unsubscribe();
+      unsubscribeAdConfigs();
+    };
   }, [user]);
 
   useEffect(() => {
@@ -502,6 +571,16 @@ function AppContent() {
                 {user.photoURL && <img src={user.photoURL || undefined} alt="Avatar" className="w-full h-full object-cover" />}
               </div>
             </div>
+            
+            {/* Sidebar Ad Slot */}
+            {activeModule !== 'admin' && (adConfigs.find(c => c.placementId === 'sidebar_bottom')?.isVisible !== false) && (
+              <AdSense 
+                adSlot="SIDEBAR_AD_SLOT" 
+                adFormat="rectangle" 
+                fullWidthResponsive={false}
+                className="my-2 p-2 rounded-xl"
+              />
+            )}
           </div>
         </aside>
 
@@ -545,8 +624,15 @@ function AppContent() {
                 {activeModule === 'admin' && 'Manage application content and user access.'}
               </p>
             </div>
-            {activeModule !== 'dashboard' && (
-              <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleShareApp}
+                className="px-4 py-2 bg-[var(--neon-cyan)] text-black rounded-xl border border-[var(--neon-cyan)] flex items-center gap-2 shadow-[0_0_10px_rgba(0,243,255,0.3)] hover:opacity-90 transition-all w-full md:w-auto justify-center font-semibold"
+              >
+                <Share2 className="w-4 h-4" />
+                <span className="text-sm">Share App</span>
+              </button>
+              {activeModule !== 'dashboard' && (
                 <button 
                   onClick={() => setActiveModule('dashboard')}
                   className="px-4 py-2 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] flex items-center gap-2 shadow-sm hover:bg-[var(--bg-primary)] transition-colors w-full md:w-auto justify-center"
@@ -554,8 +640,8 @@ function AppContent() {
                   <LayoutDashboard className="w-4 h-4 text-[var(--text-secondary)]" />
                   <span className="text-sm font-medium">Dashboard</span>
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </header>
 
           <AnimatePresence mode="wait">
@@ -568,6 +654,7 @@ function AppContent() {
             >
               {activeModule === 'dashboard' && (
                 <Dashboard 
+                  adConfigs={adConfigs}
                   onNavigate={(module, state) => {
                     setActiveModule(module);
                     setDashboardNavState(state);
@@ -590,12 +677,30 @@ function AppContent() {
               {activeModule === 'ad-policy' && <AdPolicyChecker />}
               {activeModule === 'competitor-intelligence' && <CompetitorIntelligence />}
               {activeModule === 'brand-voice' && <BrandVoiceManager />}
+              {activeModule === 'privacy-policy' && <PrivacyPolicy />}
+              {activeModule === 'terms-conditions' && <TermsAndConditions />}
+              {activeModule === 'contact-us' && <ContactUs />}
               {activeModule === 'learning' && (
                 <LearningModule initialTab={dashboardNavState?.tab as any} />
               )}
               {activeModule === 'admin' && <AdminModule isMaster={isMaster} />}
             </motion.div>
           </AnimatePresence>
+
+          {/* Footer Ad Slot */}
+          {activeModule !== 'admin' && (adConfigs.find(c => c.placementId === 'footer_ad')?.isVisible !== false) && (
+            <AdSense 
+              adSlot="FOOTER_AD_SLOT" 
+              className="mt-6 bg-[var(--bg-secondary)] border border-[var(--border-color)] p-4 rounded-xl"
+            />
+          )}
+          
+          {/* Footer */}
+          <footer className="mt-12 pt-8 border-t border-[var(--border-color)] flex flex-wrap gap-6 justify-center text-sm text-[var(--text-secondary)]">
+            <button onClick={() => setActiveModule('privacy-policy')} className="hover:text-[var(--neon-cyan)] transition-colors">Privacy Policy</button>
+            <button onClick={() => setActiveModule('terms-conditions')} className="hover:text-[var(--neon-cyan)] transition-colors">Terms & Conditions</button>
+            <button onClick={() => setActiveModule('contact-us')} className="hover:text-[var(--neon-cyan)] transition-colors">Contact Us</button>
+          </footer>
         </main>
 
         <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />

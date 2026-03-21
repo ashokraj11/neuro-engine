@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { trackGeneratorClick } from '../utils/tracking';
 import { geminiService } from '../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, limit } from 'firebase/firestore';
-import { Loader2, BookOpen, Link as LinkIcon, TypeIcon, Save, Copy, Check, Eye, Download, X, List, Target, Ruler } from 'lucide-react';
+import { Loader2, BookOpen, Link as LinkIcon, TypeIcon, Copy, Check, Eye, Download, X, List, Target, Ruler } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'motion/react';
@@ -19,7 +20,6 @@ export function LeadMagnetGenerator() {
     monetizationGoal: 'Email Capture'
       });
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [showReader, setShowReader] = useState(false);
@@ -34,7 +34,6 @@ export function LeadMagnetGenerator() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setBrandVoice(docSnap.data());
-          setUseBrandVoice(true);
         }
       } catch (error) {
         console.error("Error fetching brand voice:", error);
@@ -67,6 +66,7 @@ export function LeadMagnetGenerator() {
   ];
 
   const handleGenerate = async () => {
+    trackGeneratorClick('lead-magnet-generator');
     if (!formData.productDetails && !formData.url) {
       alert("Please provide either a URL or Product Details.");
       return;
@@ -94,32 +94,6 @@ export function LeadMagnetGenerator() {
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const saveToLibrary = async () => {
-    if (!result || !auth.currentUser) return;
-    setSaving(true);
-    try {
-      // Truncate content to avoid Firestore size limits
-      const truncatedContent = {
-        ...result,
-        content: result.content.substring(0, 500000) + (result.content.length > 500000 ? '... [Truncated]' : '')
-      };
-
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'lead-magnet',
-        title: result.titles[0] || 'Lead Magnet Guide',
-        content: truncatedContent,
-        metadata: formData,
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library (content may be truncated if too large)!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -281,14 +255,6 @@ export function LeadMagnetGenerator() {
               >
                 {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                 Copy
-              </button>
-              <button
-                onClick={saveToLibrary}
-                disabled={saving}
-                className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors text-xs font-medium"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Save
               </button>
             </div>
           )}

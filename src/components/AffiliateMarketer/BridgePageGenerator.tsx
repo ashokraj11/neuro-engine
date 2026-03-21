@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { trackGeneratorClick } from '../../utils/tracking';
 import { geminiService } from '../../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
-import { Loader2, Wand2, Save, Copy, Check, FileText, Download, Layout } from 'lucide-react';
+import { Loader2, Wand2, Copy, Check, FileText, Download, Layout } from 'lucide-react';
 import { motion } from 'motion/react';
 import { BrandVoiceToggle } from '../BrandVoiceToggle';
 import { bridgePageTemplates } from '../../utils/htmlTemplates';
@@ -14,7 +15,6 @@ export function BridgePageGenerator() {
     targetAudience: ''
       });
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [brandVoice, setBrandVoice] = useState<{ tone: string, examples: string } | null>(null);
@@ -37,6 +37,7 @@ export function BridgePageGenerator() {
   }, []);
 
   const handleGenerate = async () => {
+    trackGeneratorClick('bridge-page-generator');
     if (!formData.offerUrl && !formData.productDetails) {
       alert("Please provide either an offer URL or product details.");
       return;
@@ -62,26 +63,6 @@ export function BridgePageGenerator() {
       alert("Error generating bridge page. Check console.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const saveToLibrary = async () => {
-    if (!result || !auth.currentUser) return;
-    setSaving(true);
-    try {
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'bridge-page',
-        title: result.headline.substring(0, 30) || 'Bridge Page',
-        content: result,
-        metadata: formData,
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -228,14 +209,6 @@ export function BridgePageGenerator() {
                 >
                   {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                   Copy
-                </button>
-                <button
-                  onClick={saveToLibrary}
-                  disabled={saving}
-                  className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors text-xs font-medium"
-                >
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  Save
                 </button>
               </div>
               <div className="flex items-center gap-1 bg-[var(--bg-primary)] p-1 rounded-lg border border-[var(--border-color)]">

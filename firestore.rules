@@ -53,6 +53,14 @@ service cloud.firestore {
     //   - isVisibleForAll: bool (required)
     //   - visibleForUsers: list (required) - List of user UIDs
     //
+    // Collection: ad_config
+    // Document ID: {placementId}
+    // Fields:
+    //   - placementId: string (required)
+    //   - name: string (required)
+    //   - isVisible: bool (required)
+    //   - updatedAt: timestamp (optional)
+    //
     // ===============================================================
 
     // ===============================================================
@@ -74,7 +82,7 @@ service cloud.firestore {
     function isMasterAdmin() {
       return isAuthenticated() && 
         (
-          request.auth.token.email == "mail2ashokrajj@gmail.com" ||
+          (request.auth.token.email == "mail2ashokrajj@gmail.com" && request.auth.token.email_verified == true) ||
           (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'master')
         );
@@ -125,9 +133,10 @@ service cloud.firestore {
     function isValidAsset(data) {
       return hasOnlyAllowedFields(['userId', 'type', 'title', 'content', 'metadata', 'createdAt']) &&
              data.userId == request.auth.uid &&
-             data.type in ['blog', 'reel', 'ads', 'email', 'landing'] &&
+             data.type is string &&
              data.title is string && data.title.size() < 200 &&
-             data.content is map &&
+             (data.content is map || data.content is list) &&
+             (!('metadata' in data) || data.metadata is map) &&
              data.createdAt is timestamp;
     }
 
@@ -148,6 +157,24 @@ service cloud.firestore {
              isValidEmail(data.userEmail) &&
              data.userEmail == request.auth.token.email &&
              data.courseId is string && data.courseId.size() > 0 &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidToolClick(data) {
+      return hasOnlyAllowedFields(['userId', 'userEmail', 'toolId', 'timestamp']) &&
+             data.userId == request.auth.uid &&
+             isValidEmail(data.userEmail) &&
+             data.userEmail == request.auth.token.email &&
+             data.toolId is string && data.toolId.size() > 0 &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidGeneratorClick(data) {
+      return hasOnlyAllowedFields(['userId', 'userEmail', 'generatorId', 'timestamp']) &&
+             data.userId == request.auth.uid &&
+             isValidEmail(data.userEmail) &&
+             data.userEmail == request.auth.token.email &&
+             data.generatorId is string && data.generatorId.size() > 0 &&
              data.timestamp is timestamp;
     }
 
@@ -186,6 +213,14 @@ service cloud.firestore {
              data.visibleForUsers is list;
     }
 
+    function isValidAdConfig(data) {
+      return hasOnlyAllowedFields(['placementId', 'name', 'isVisible', 'updatedAt']) &&
+             data.placementId is string &&
+             data.name is string &&
+             data.isVisible is bool &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
     function isValidBrandVoice(data) {
       return hasOnlyAllowedFields(['examples', 'tone', 'productDetails', 'logoUrl', 'colors', 'updatedAt']) &&
              (!('examples' in data) || (data.examples is string && data.examples.size() < 5000)) &&
@@ -206,6 +241,16 @@ service cloud.firestore {
              data.vocabulary is string && data.vocabulary.size() < 5000 &&
              data.psychologicalTriggers is string && data.psychologicalTriggers.size() < 5000 &&
              data.updatedAt is timestamp;
+    }
+
+    function isValidMessage(data) {
+      return hasOnlyAllowedFields(['name', 'email', 'subject', 'message', 'createdAt', 'read']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             isValidEmail(data.email) &&
+             data.subject is string && data.subject.size() > 0 && data.subject.size() < 200 &&
+             data.message is string && data.message.size() > 0 && data.message.size() < 5000 &&
+             data.createdAt is timestamp &&
+             data.read is bool;
     }
 
     // ===============================================================
@@ -265,9 +310,29 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
+    match /tool_clicks/{clickId} {
+      allow create: if isAuthenticated() && isValidToolClick(request.resource.data);
+      allow read: if isAdmin();
+    }
+
+    match /generator_clicks/{clickId} {
+      allow create: if isAuthenticated() && isValidGeneratorClick(request.resource.data);
+      allow read: if isAdmin();
+    }
+
     match /module_visibility/{moduleId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin() && isValidModuleVisibility(request.resource.data);
+    }
+
+    match /ad_config/{placementId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidAdConfig(request.resource.data);
+    }
+
+    match /messages/{messageId} {
+      allow create: if isValidMessage(request.resource.data);
+      allow read, update, delete: if isAdmin();
     }
 
     // Default deny

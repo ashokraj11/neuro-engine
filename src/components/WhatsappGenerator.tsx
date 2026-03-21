@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { trackGeneratorClick } from '../utils/tracking';
 import { geminiService } from '../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, limit } from 'firebase/firestore';
-import { Loader2, MessageSquare, Link as LinkIcon, Type as TypeIcon, Save, Copy, Check, ImageIcon } from 'lucide-react';
+import { Loader2, MessageSquare, Link as LinkIcon, Type as TypeIcon, Copy, Check, ImageIcon } from 'lucide-react';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
 import { motion } from 'motion/react';
 
@@ -12,7 +13,6 @@ export function WhatsappGenerator() {
     productDetails: ''
       });
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [results, setResults] = useState<any[]>([]);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [generatingImages, setGeneratingImages] = useState<Record<number, boolean>>({});
@@ -27,7 +27,6 @@ export function WhatsappGenerator() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setBrandVoice(docSnap.data());
-          setUseBrandVoice(true);
         }
       } catch (error) {
         console.error("Error fetching brand voice:", error);
@@ -37,6 +36,7 @@ export function WhatsappGenerator() {
   }, []);
 
   const handleGenerate = async () => {
+    trackGeneratorClick('whatsapp-generator');
     if (!formData.productDetails && !formData.url) {
       alert("Please provide either a URL or Product Details.");
       return;
@@ -88,32 +88,6 @@ export function WhatsappGenerator() {
       alert("Failed to generate image.");
     } finally {
       setGeneratingImages(prev => ({ ...prev, [idx]: false }));
-    }
-  };
-
-  const saveToLibrary = async () => {
-    if (results.length === 0 || !auth.currentUser) return;
-    setSaving(true);
-    try {
-      // Strip imageUrl to avoid Firestore size limits
-      const resultsWithoutMedia = results.map(swipe => {
-        const { imageUrl, ...rest } = swipe;
-        return rest;
-      });
-
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'whatsapp',
-        title: formData.productDetails.substring(0, 30) || 'WhatsApp Sequence',
-        content: resultsWithoutMedia,
-        metadata: formData,
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library (metadata only)!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -191,16 +165,6 @@ export function WhatsappGenerator() {
       <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl neon-border shadow-sm flex flex-col h-[700px]">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-[var(--text-primary)]">Generated 10-Part Sequence</h2>
-          {results.length > 0 && (
-            <button
-              onClick={saveToLibrary}
-              disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors text-sm font-medium"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Save to Library
-            </button>
-          )}
         </div>
         
         <div className="flex-1 overflow-y-auto space-y-6 pr-2">

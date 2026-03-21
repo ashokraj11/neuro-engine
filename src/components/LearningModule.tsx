@@ -108,6 +108,20 @@ export function LearningModule({ initialTab }: { initialTab?: TabType }) {
     }
   };
 
+  const handleToolClick = async (toolId: string) => {
+    if (!auth.currentUser) return;
+    try {
+      await addDoc(collection(db, 'tool_clicks'), {
+        userId: auth.currentUser.uid,
+        userEmail: auth.currentUser.email,
+        toolId: toolId,
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      console.error("Error tracking tool click:", error);
+    }
+  };
+
   const filteredCourses = selectedCategory === 'All' 
     ? courses 
     : courses.filter(c => c.category === selectedCategory);
@@ -310,6 +324,7 @@ export function LearningModule({ initialTab }: { initialTab?: TabType }) {
                         href={tool.link} 
                         target="_blank" 
                         rel="noopener noreferrer" 
+                        onClick={() => handleToolClick(tool.id)}
                         className="flex items-center justify-between py-3 px-4 bg-[var(--bg-primary)] rounded-2xl text-sm font-bold text-cyan-500 hover:bg-cyan-500 hover:text-white transition-all"
                       >
                         Open Tool

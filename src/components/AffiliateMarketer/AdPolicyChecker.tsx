@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { geminiService } from '../../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
-import { Loader2, Wand2, Save, Copy, Check, ShieldCheck, FileText } from 'lucide-react';
+import { Loader2, Wand2, Copy, Check, ShieldCheck, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { BrandVoiceToggle } from '../BrandVoiceToggle';
 
@@ -12,7 +12,6 @@ export function AdPolicyChecker() {
     landingPageUrl: ''
       });
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [brandVoice, setBrandVoice] = useState<{ tone: string, examples: string } | null>(null);
@@ -26,7 +25,6 @@ export function AdPolicyChecker() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setBrandVoice(docSnap.data() as any);
-          setUseBrandVoice(true);
         }
       } catch (error) {
         console.error("Error fetching brand voice:", error);
@@ -59,26 +57,6 @@ export function AdPolicyChecker() {
       alert("Error checking ad policy. Check console.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const saveToLibrary = async () => {
-    if (!result || !auth.currentUser) return;
-    setSaving(true);
-    try {
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'ad-policy-check',
-        title: `Policy Check: ${result.status}`,
-        content: result,
-        metadata: formData,
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -187,13 +165,9 @@ export function AdPolicyChecker() {
               </div>
 
               <div className="flex gap-2 pt-4">
-                <button onClick={copyToClipboard} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)] rounded-lg transition-colors text-sm font-medium">
+                <button onClick={copyToClipboard} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)] rounded-lg transition-colors text-sm font-medium">
                   {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                   Copy
-                </button>
-                <button onClick={saveToLibrary} disabled={saving} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors text-sm font-medium">
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  Save
                 </button>
               </div>
             </motion.div>

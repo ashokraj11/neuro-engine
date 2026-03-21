@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { geminiService } from '../../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
-import { Loader2, Wand2, Save, Copy, Check, Crosshair, FileText } from 'lucide-react';
+import { Loader2, Wand2, Copy, Check, Crosshair, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { BrandVoiceToggle } from '../BrandVoiceToggle';
 
@@ -12,7 +12,6 @@ export function CompetitorIntelligence() {
     competitorCopy: ''
       });
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [brandVoice, setBrandVoice] = useState<{ tone: string, examples: string } | null>(null);
@@ -26,7 +25,6 @@ export function CompetitorIntelligence() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setBrandVoice(docSnap.data() as any);
-          setUseBrandVoice(true);
         }
       } catch (error) {
         console.error("Error fetching brand voice:", error);
@@ -59,26 +57,6 @@ export function CompetitorIntelligence() {
       alert("Error generating counter-strategy. Check console.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const saveToLibrary = async () => {
-    if (!auth.currentUser || !result) return;
-    setSaving(true);
-    try {
-      await addDoc(collection(db, 'assets'), {
-        userId: auth.currentUser.uid,
-        type: 'competitor-strategy',
-        title: `Counter-Strategy: ${formData.competitorUrl || 'Custom Copy'}`,
-        content: result,
-        metadata: formData,
-        createdAt: serverTimestamp()
-      });
-      alert("Saved to library!");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'assets');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -146,12 +124,6 @@ export function CompetitorIntelligence() {
       <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl neon-border shadow-sm flex flex-col h-[600px]">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-[var(--text-primary)]">Counter-Strategy</h2>
-          {result && (
-            <button onClick={saveToLibrary} disabled={saving} className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-xl hover:bg-rose-700 transition-colors text-sm font-bold">
-              <Save className="w-4 h-4" />
-              {saving ? 'Saving...' : 'Save Strategy'}
-            </button>
-          )}
         </div>
         
         <div className="flex-1 overflow-y-auto space-y-6 pr-4 custom-scrollbar">

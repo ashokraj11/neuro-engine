@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, getDocs, setDoc } from 'firebase/firestore';
-import { Plus, Pencil, Trash2, Youtube, Link as LinkIcon, Image as ImageIcon, Save, X, Loader2, Upload, CheckCircle2, Users, User as UserIcon, Wrench, FileDown, Copy, ShieldCheck, HelpCircle, Eye, EyeOff, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Youtube, Link as LinkIcon, Image as ImageIcon, Save, X, Loader2, Upload, CheckCircle2, Users, User as UserIcon, Wrench, FileDown, Copy, ShieldCheck, HelpCircle, Eye, EyeOff, Search, MessageSquare } from 'lucide-react';
+import { AdminMessagesModule } from './AdminMessagesModule';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
@@ -35,7 +36,9 @@ interface User {
 
 interface Click {
   userId: string;
-  courseId: string;
+  courseId?: string;
+  toolId?: string;
+  generatorId?: string;
 }
 
 interface Tool {
@@ -63,6 +66,12 @@ interface BlogPost {
   content: string;
 }
 
+interface AdConfig {
+  placementId: string;
+  isVisible: boolean;
+  name: string;
+}
+
 export function AdminModule({ isMaster }: { isMaster: boolean }) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -71,10 +80,20 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [moduleVisibility, setModuleVisibility] = useState<ModuleVisibility[]>([]);
+  const [adConfigs, setAdConfigs] = useState<AdConfig[]>([]);
 
   const [showUserList, setShowUserList] = useState(false);
   const [showEngagement, setShowEngagement] = useState(false);
-  const [activeAdminTab, setActiveAdminTab] = useState<'courses' | 'users' | 'tools' | 'templates' | 'blog' | 'system' | 'modules'>('courses');
+  const [activeAdminTab, setActiveAdminTab] = useState<'courses' | 'users' | 'tools' | 'templates' | 'blog' | 'system' | 'modules' | 'ads' | 'messages'>('courses');
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    const q = query(collection(db, 'messages'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setUnreadMessages(snapshot.docs.filter(doc => !doc.data().read).length);
+    });
+    return () => unsubscribe();
+  }, []);
   const [loading, setLoading] = useState(true);
   const [userSearch, setUserSearch] = useState('');
   
@@ -137,17 +156,50 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
 
     const qClicks = query(collection(db, 'course_clicks'));
     const unsubscribeClicks = onSnapshot(qClicks, (snapshot) => {
-      setClicks(snapshot.docs.map(doc => ({
+      setClicks(prev => [...prev.filter(c => !c.courseId), ...snapshot.docs.map(doc => ({
         userId: doc.data().userId,
         courseId: doc.data().courseId
-      } as Click)));
+      } as Click))]);
     }, (error) => {
       console.error("Error fetching clicks:", error);
+    });
+
+    const qToolClicks = query(collection(db, 'tool_clicks'));
+    const unsubscribeToolClicks = onSnapshot(qToolClicks, (snapshot) => {
+      setClicks(prev => [...prev.filter(c => !c.toolId), ...snapshot.docs.map(doc => ({
+        userId: doc.data().userId,
+        toolId: doc.data().toolId
+      } as Click))]);
+    }, (error) => {
+      console.error("Error fetching tool clicks:", error);
+    });
+
+    const qGeneratorClicks = query(collection(db, 'generator_clicks'));
+    const unsubscribeGeneratorClicks = onSnapshot(qGeneratorClicks, (snapshot) => {
+      setClicks(prev => [...prev.filter(c => !c.generatorId), ...snapshot.docs.map(doc => ({
+        userId: doc.data().userId,
+        generatorId: doc.data().generatorId
+      } as Click))]);
+    }, (error) => {
+      console.error("Error fetching generator clicks:", error);
+    });
+
+    const qAdConfigs = query(collection(db, 'ad_config'));
+    const unsubscribeAdConfigs = onSnapshot(qAdConfigs, (snapshot) => {
+      setAdConfigs(snapshot.docs.map(doc => ({
+        placementId: doc.id,
+        ...doc.data()
+      } as AdConfig)));
+    }, (error) => {
+      console.error("Error fetching ad configs:", error);
     });
 
     return () => {
       unsubscribeUsers();
       unsubscribeClicks();
+      unsubscribeToolClicks();
+      unsubscribeGeneratorClicks();
+      unsubscribeAdConfigs();
     };
   }, []);
 
@@ -594,6 +646,11 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
         <button onClick={() => setActiveAdminTab('templates')} className={`pb-4 px-2 font-bold transition-all ${activeAdminTab === 'templates' ? 'text-cyan-500 border-b-2 border-cyan-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>Templates</button>
         <button onClick={() => setActiveAdminTab('blog')} className={`pb-4 px-2 font-bold transition-all ${activeAdminTab === 'blog' ? 'text-cyan-500 border-b-2 border-cyan-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>Blog</button>
         <button onClick={() => setActiveAdminTab('modules')} className={`pb-4 px-2 font-bold transition-all ${activeAdminTab === 'modules' ? 'text-cyan-500 border-b-2 border-cyan-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>Module Manager</button>
+        <button onClick={() => setActiveAdminTab('ads')} className={`pb-4 px-2 font-bold transition-all ${activeAdminTab === 'ads' ? 'text-cyan-500 border-b-2 border-cyan-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>Ads Control</button>
+        <button onClick={() => setActiveAdminTab('messages')} className={`pb-4 px-2 font-bold transition-all ${activeAdminTab === 'messages' ? 'text-cyan-500 border-b-2 border-cyan-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'} flex items-center gap-2`}>
+          Messages
+          {unreadMessages > 0 && <span className="bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">{unreadMessages}</span>}
+        </button>
         <button onClick={() => setActiveAdminTab('system')} className={`pb-4 px-2 font-bold transition-all ${activeAdminTab === 'system' ? 'text-cyan-500 border-b-2 border-cyan-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>System Info</button>
         {isMaster && (
           <button onClick={() => setActiveAdminTab('users')} className={`pb-4 px-2 font-bold transition-all ${activeAdminTab === 'users' ? 'text-cyan-500 border-b-2 border-cyan-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>Users</button>
@@ -723,6 +780,8 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
                     <th className="px-6 py-4">Email</th>
                     <th className="px-6 py-4">Total Clicks</th>
                     <th className="px-6 py-4">Course Engagement</th>
+                    <th className="px-6 py-4">Tool Engagement</th>
+                    <th className="px-6 py-4">Generator Engagement</th>
                     <th className="px-6 py-4">Most Interested</th>
                   </tr>
                 </thead>
@@ -730,8 +789,12 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
                   {users.map((user) => {
                     const userClicks = clicks.filter(c => c.userId === user.id);
                     const courseCounts: { [courseId: string]: number } = {};
+                    const toolCounts: { [toolId: string]: number } = {};
+                    const generatorCounts: { [generatorId: string]: number } = {};
                     userClicks.forEach(c => {
-                      courseCounts[c.courseId] = (courseCounts[c.courseId] || 0) + 1;
+                      if (c.courseId) courseCounts[c.courseId] = (courseCounts[c.courseId] || 0) + 1;
+                      if (c.toolId) toolCounts[c.toolId] = (toolCounts[c.toolId] || 0) + 1;
+                      if (c.generatorId) generatorCounts[c.generatorId] = (generatorCounts[c.generatorId] || 0) + 1;
                     });
                     
                     let mostInterestedCourseId = '';
@@ -759,6 +822,27 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
                             );
                           })}
                           {Object.keys(courseCounts).length === 0 && 'N/A'}
+                        </td>
+                        <td className="px-6 py-4 text-[var(--text-secondary)]">
+                          {Object.entries(toolCounts).map(([toolId, count]) => {
+                            const tool = tools.find(t => t.id === toolId);
+                            return (
+                              <div key={toolId} className="text-xs">
+                                {tool?.name || 'Unknown'}: {count}
+                              </div>
+                            );
+                          })}
+                          {Object.keys(toolCounts).length === 0 && 'N/A'}
+                        </td>
+                        <td className="px-6 py-4 text-[var(--text-secondary)]">
+                          {Object.entries(generatorCounts).map(([generatorId, count]) => {
+                            return (
+                              <div key={generatorId} className="text-xs">
+                                {generatorId}: {count}
+                              </div>
+                            );
+                          })}
+                          {Object.keys(generatorCounts).length === 0 && 'N/A'}
                         </td>
                         <td className="px-6 py-4 text-[var(--text-secondary)]">{mostInterestedCourse?.title || 'N/A'}</td>
                       </tr>
@@ -992,6 +1076,78 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
         </div>
       )}
 
+      {activeAdminTab === 'ads' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-[var(--text-primary)]">Ads Placement Control</h2>
+            <p className="text-sm text-[var(--text-secondary)]">Enable or disable AdSense placements across the app.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { id: 'dashboard_top', name: 'Dashboard Top Ad' },
+              { id: 'sidebar_bottom', name: 'Sidebar Bottom Ad' },
+              { id: 'footer_ad', name: 'Footer Ad' }
+            ].map((placement) => {
+              const config = adConfigs.find(c => c.placementId === placement.id) || {
+                placementId: placement.id,
+                isVisible: true,
+                name: placement.name
+              };
+
+              const toggleAdVisibility = async () => {
+                try {
+                  await setDoc(doc(db, 'ad_config', placement.id), {
+                    placementId: placement.id,
+                    name: placement.name,
+                    isVisible: !config.isVisible,
+                    updatedAt: serverTimestamp()
+                  });
+                  setNotification({ message: `${placement.name} visibility updated!`, type: 'success' });
+                } catch (error: any) {
+                  handleFirestoreError(error, OperationType.WRITE, `ad_config/${placement.id}`);
+                }
+              };
+
+              return (
+                <div key={placement.id} className="bg-[var(--bg-secondary)] p-6 rounded-2xl border border-[var(--border-color)] neon-border flex flex-col justify-between h-full">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-500 shadow-[0_0_10px_rgba(0,243,255,0.2)]">
+                      <ImageIcon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-[var(--text-primary)]">{placement.name}</h4>
+                      <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">{placement.id}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-4 border-t border-[var(--border-color)]">
+                    <span className="text-sm font-medium text-[var(--text-secondary)]">
+                      Status: <span className={cn("font-bold", config.isVisible ? "text-emerald-500" : "text-red-500")}>
+                        {config.isVisible ? 'Visible' : 'Hidden'}
+                      </span>
+                    </span>
+                    <button
+                      onClick={toggleAdVisibility}
+                      className={cn(
+                        "w-12 h-6 rounded-full transition-all relative",
+                        config.isVisible ? "bg-cyan-500" : "bg-gray-600"
+                      )}
+                    >
+                      <div className={cn(
+                        "absolute top-1 w-4 h-4 rounded-full bg-white transition-all",
+                        config.isVisible ? "left-7" : "left-1"
+                      )} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {activeAdminTab === 'messages' && <AdminMessagesModule />}
       {activeAdminTab === 'system' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
