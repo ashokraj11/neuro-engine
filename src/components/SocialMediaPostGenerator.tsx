@@ -159,18 +159,18 @@ export function SocialMediaPostGenerator() {
                 NEURODIGITAL ENGINE ACTIVE
               </span>
             </h2>
-            <div className="flex bg-[var(--bg-primary)] p-1 rounded-xl border border-[var(--border-color)]">
+            <div className="flex bg-[var(--bg-primary)] p-0.5 rounded-lg border border-[var(--border-color)]">
               <button
                 onClick={() => setMode('bulk')}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${mode === 'bulk' ? 'bg-cyan-500 text-black shadow-lg' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                className={`px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold transition-all ${mode === 'bulk' ? 'bg-cyan-500 text-black shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
               >
-                Bulk Mode
+                Bulk
               </button>
               <button
                 onClick={() => setMode('manual')}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${mode === 'manual' ? 'bg-cyan-500 text-black shadow-lg' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                className={`px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold transition-all ${mode === 'manual' ? 'bg-cyan-500 text-black shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
               >
-                Manual Mode
+                Manual
               </button>
             </div>
           </div>

@@ -380,25 +380,25 @@ function AppContent() {
 
         {/* Sidebar */}
         <aside className={cn(
-          "fixed inset-y-0 left-0 w-72 bg-[var(--bg-secondary)] border-r border-[var(--border-color)] flex flex-col z-50 transition-all duration-300 transform lg:h-screen neon-border",
+          "fixed inset-y-0 left-0 w-64 bg-[var(--bg-secondary)] border-r border-[var(--border-color)] flex flex-col z-50 transition-all duration-300 transform h-screen neon-border",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
           !isSidebarCollapsed ? "lg:translate-x-0 lg:sticky lg:top-0" : "lg:-translate-x-full lg:fixed"
         )}>
-          <div className="p-8 hidden lg:flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.4)]">
-                <Brain className="w-6 h-6 text-[var(--neon-cyan,white)]" />
+          <div className="p-6 hidden lg:flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-black rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.4)]">
+                <Brain className="w-5 h-5 text-[var(--neon-cyan,white)]" />
               </div>
               <div>
-                <h1 className="font-bold text-lg leading-tight neon-text-gradient">Neuro Engine</h1>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--text-secondary)]">AI Engine</p>
+                <h1 className="font-bold text-base leading-tight neon-text-gradient">Neuro Engine</h1>
+                <p className="text-[9px] uppercase tracking-widest font-bold text-[var(--text-secondary)]">AI Engine</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
               <ThemeToggle />
               <button
                 onClick={() => setIsSidebarCollapsed(true)}
-                className="p-1.5 hover:bg-[var(--bg-primary)] rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 transition-colors"
+                className="p-1 hover:bg-[var(--bg-primary)] rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 transition-colors"
                 title="Hide Sidebar"
               >
                 <PanelLeftClose className="w-4 h-4" />
@@ -406,8 +406,8 @@ function AppContent() {
             </div>
           </div>
 
-          <nav className="flex-1 px-4 space-y-2 pt-8 lg:pt-0 overflow-y-auto custom-scrollbar">
-            <div className="text-[10px] uppercase font-bold text-[var(--text-secondary)] px-4 mb-4 tracking-widest">Main Modules</div>
+          <nav className="flex-1 px-3 space-y-1.5 pt-6 lg:pt-0 overflow-y-auto custom-scrollbar">
+            <div className="text-[9px] uppercase font-bold text-[var(--text-secondary)] px-3 mb-3 tracking-widest">Main Modules</div>
             
             {/* Main Modules */}
             {mainModules.map((m) => (
@@ -418,24 +418,24 @@ function AppContent() {
                   setIsSidebarOpen(false);
                 }}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group",
+                  "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all group",
                   activeModule === m.id 
                     ? "bg-[var(--bg-primary)] shadow-[0_0_10px_rgba(0,243,255,0.1)] border border-[var(--neon-cyan)]/20" 
                     : "hover:bg-[var(--bg-primary)]"
                 )}
               >
                 <m.icon className={cn(
-                  "w-5 h-5 transition-colors",
+                  "w-4 h-4 transition-colors",
                   activeModule === m.id ? "text-[var(--neon-cyan)] drop-shadow-[0_0_5px_rgba(0,243,255,0.5)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
                 )} />
                 <span className={cn(
-                  "font-medium text-sm",
+                  "font-medium text-xs",
                   activeModule === m.id ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
                 )}>
                   {m.name}
                 </span>
                 {activeModule === m.id && (
-                  <motion.div layoutId="active-indicator" className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--neon-cyan)] shadow-[0_0_8px_rgba(0,243,255,0.8)]" />
+                  <motion.div layoutId="active-indicator" className="ml-auto w-1 h-1 rounded-full bg-[var(--neon-cyan)] shadow-[0_0_8px_rgba(0,243,255,0.8)]" />
                 )}
               </button>
             ))}
@@ -445,22 +445,22 @@ function AppContent() {
               <button
                 onClick={() => setIsGeneratorsOpen(!isGeneratorsOpen)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group hover:bg-[var(--bg-primary)]",
+                  "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all group hover:bg-[var(--bg-primary)]",
                   generatorModules.some(m => m.id === activeModule) && "text-[var(--text-primary)]"
                 )}
               >
                 <Wand2 className={cn(
-                  "w-5 h-5 transition-colors",
+                  "w-4 h-4 transition-colors",
                   generatorModules.some(m => m.id === activeModule) ? "text-[var(--neon-magenta)] drop-shadow-[0_0_5px_rgba(255,0,255,0.5)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
                 )} />
-                <span className="font-medium text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
+                <span className="font-medium text-xs text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
                   Generators
                 </span>
                 <div className="ml-auto">
                   {isGeneratorsOpen ? (
-                    <ChevronDown className="w-4 h-4 text-[var(--text-secondary)]" />
+                    <ChevronDown className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                   ) : (
-                    <ChevronRight className="w-4 h-4 text-[var(--text-secondary)]" />
+                    <ChevronRight className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                   )}
                 </div>
               </button>
@@ -471,7 +471,7 @@ function AppContent() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden pl-4 space-y-1"
+                    className="overflow-hidden pl-3 space-y-1"
                   >
                     {generatorModules.map((m) => (
                       <button
@@ -481,18 +481,18 @@ function AppContent() {
                           setIsSidebarOpen(false);
                         }}
                         className={cn(
-                          "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all group",
+                          "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all group",
                           activeModule === m.id 
                             ? "bg-[var(--bg-primary)] shadow-[0_0_10px_rgba(255,0,255,0.1)] border border-[var(--neon-magenta)]/20" 
                             : "hover:bg-[var(--bg-primary)]"
                         )}
                       >
                         <m.icon className={cn(
-                          "w-4 h-4 transition-colors",
+                          "w-3.5 h-3.5 transition-colors",
                           activeModule === m.id ? "text-[var(--neon-magenta)] drop-shadow-[0_0_5px_rgba(255,0,255,0.5)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
                         )} />
                         <span className={cn(
-                          "font-medium text-xs",
+                          "font-medium text-[11px]",
                           activeModule === m.id ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
                         )}>
                           {m.name}
@@ -509,22 +509,22 @@ function AppContent() {
               <button
                 onClick={() => setIsAffiliateOpen(!isAffiliateOpen)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group hover:bg-[var(--bg-primary)]",
+                  "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all group hover:bg-[var(--bg-primary)]",
                   affiliateModules.some(m => m.id === activeModule) && "text-[var(--text-primary)]"
                 )}
               >
                 <Target className={cn(
-                  "w-5 h-5 transition-colors",
+                  "w-4 h-4 transition-colors",
                   affiliateModules.some(m => m.id === activeModule) ? "text-[var(--neon-cyan)] drop-shadow-[0_0_5px_rgba(0,243,255,0.5)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
                 )} />
-                <span className="font-medium text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
+                <span className="font-medium text-xs text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
                   Affiliate Marketer
                 </span>
                 <div className="ml-auto">
                   {isAffiliateOpen ? (
-                    <ChevronDown className="w-4 h-4 text-[var(--text-secondary)]" />
+                    <ChevronDown className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                   ) : (
-                    <ChevronRight className="w-4 h-4 text-[var(--text-secondary)]" />
+                    <ChevronRight className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                   )}
                 </div>
               </button>
@@ -535,7 +535,7 @@ function AppContent() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden pl-4 space-y-1"
+                    className="overflow-hidden pl-3 space-y-1"
                   >
                     {affiliateModules.map((m) => (
                       <button
@@ -545,18 +545,18 @@ function AppContent() {
                           setIsSidebarOpen(false);
                         }}
                         className={cn(
-                          "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all group",
+                          "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all group",
                           activeModule === m.id 
                             ? "bg-[var(--bg-primary)] shadow-[0_0_10px_rgba(0,243,255,0.1)] border border-[var(--neon-cyan)]/20" 
                             : "hover:bg-[var(--bg-primary)]"
                         )}
                       >
                         <m.icon className={cn(
-                          "w-4 h-4 transition-colors",
+                          "w-3.5 h-3.5 transition-colors",
                           activeModule === m.id ? "text-[var(--neon-cyan)] drop-shadow-[0_0_5px_rgba(0,243,255,0.5)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
                         )} />
                         <span className={cn(
-                          "font-medium text-xs",
+                          "font-medium text-[11px]",
                           activeModule === m.id ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
                         )}>
                           {m.name}
@@ -575,24 +575,24 @@ function AppContent() {
                   setIsSidebarOpen(false);
                 }}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group",
+                  "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all group",
                   activeModule === m.id 
                     ? "bg-[var(--bg-primary)] shadow-[0_0_10px_rgba(57,255,20,0.1)] border border-[var(--neon-lime)]/20" 
                     : "hover:bg-[var(--bg-primary)]"
                 )}
               >
                 <m.icon className={cn(
-                  "w-5 h-5 transition-colors",
+                  "w-4 h-4 transition-colors",
                   activeModule === m.id ? "text-[var(--neon-lime)] drop-shadow-[0_0_5px_rgba(57,255,20,0.5)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
                 )} />
                 <span className={cn(
-                  "font-medium text-sm",
+                  "font-medium text-xs",
                   activeModule === m.id ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
                 )}>
                   {m.name}
                 </span>
                 {activeModule === m.id && (
-                  <motion.div layoutId="active-indicator" className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--neon-lime)] shadow-[0_0_8px_rgba(57,255,20,0.8)]" />
+                  <motion.div layoutId="active-indicator" className="ml-auto w-1 h-1 rounded-full bg-[var(--neon-lime)] shadow-[0_0_8px_rgba(57,255,20,0.8)]" />
                 )}
               </button>
             ))}
