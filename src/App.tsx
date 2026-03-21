@@ -41,6 +41,7 @@ type Module = 'dashboard' | 'niche' | 'blog' | 'social-media' | 'reels' | 'ads' 
 
 function LoginScreen() {
   const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -48,7 +49,7 @@ function LoginScreen() {
       await loginWithGoogle();
     } catch (error) {
       console.error(error);
-      alert("Login failed. Please try again.");
+      alert("Authentication failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -65,7 +66,11 @@ function LoginScreen() {
           <Brain className="w-10 h-10 text-[var(--neon-cyan,white)]" />
         </div>
         <h1 className="text-3xl font-bold mb-2 neon-text-gradient">Neuro Engine</h1>
-        <p className="text-[var(--text-secondary)] mb-8">The ultimate AI toolkit for high-converting marketing assets.</p>
+        <p className="text-[var(--text-secondary)] mb-8">
+          {isSignUp 
+            ? "Create your account to start generating high-converting assets." 
+            : "The ultimate AI toolkit for high-converting marketing assets."}
+        </p>
         
         <button
           onClick={handleLogin}
@@ -73,12 +78,21 @@ function LoginScreen() {
           className="w-full py-4 bg-[var(--neon-cyan)] text-black rounded-xl font-bold hover:opacity-90 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-[0_0_15px_rgba(0,243,255,0.3)]"
         >
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
-          Sign in with Google
+          {isSignUp ? "Create Account with Google" : "Sign in with Google"}
         </button>
-        
-        <p className="mt-6 text-xs text-[var(--text-secondary)]">
-          By signing in, you agree to our Terms of Service and Privacy Policy.
-        </p>
+
+        <div className="mt-6 flex flex-col gap-4">
+          <button 
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="text-sm text-[var(--neon-cyan)] hover:underline transition-all"
+          >
+            {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Create one"}
+          </button>
+          
+          <p className="text-xs text-[var(--text-secondary)]">
+            By {isSignUp ? "creating an account" : "signing in"}, you agree to our Terms of Service and Privacy Policy.
+          </p>
+        </div>
       </motion.div>
     </div>
   );
@@ -106,6 +120,11 @@ function AppContent() {
   const [moduleVisibility, setModuleVisibility] = useState<ModuleVisibility[]>([]);
 
   useEffect(() => {
+    if (!user) {
+      setModuleVisibility([]);
+      return;
+    }
+
     const q = query(collection(db, 'module_visibility'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setModuleVisibility(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ModuleVisibility)));
@@ -113,7 +132,7 @@ function AppContent() {
       handleFirestoreError(error, OperationType.LIST, 'module_visibility');
     });
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
