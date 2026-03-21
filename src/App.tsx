@@ -29,6 +29,7 @@ import { ApiKeyReminder } from './components/ApiKeyReminder';
 import { AdSense } from './components/AdSense';
 import { ThemeProvider } from './context/ThemeContext';
 import { ThemeToggle } from './components/ThemeToggle';
+import { BackgroundAnimation } from './components/BackgroundAnimation';
 import { auth, loginWithGoogle, logout, db, handleFirestoreError, OperationType } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, getDoc, updateDoc, collection, onSnapshot, query } from 'firebase/firestore';
@@ -51,7 +52,7 @@ interface AdConfig {
 
 type Module = 'dashboard' | 'niche' | 'blog' | 'social-media' | 'reels' | 'ads' | 'email' | 'whatsapp' | 'landing' | 'sales-funnel' | 'lead-magnet' | 'learning' | 'admin' | 'bridge-page' | 'offer-angle' | 'ad-policy' | 'competitor-intelligence' | 'brand-voice' | 'omnichannel' | 'privacy-policy' | 'terms-conditions' | 'contact-us';
 
-function LoginScreen() {
+function LoginScreen({ onNavigate }: { onNavigate: (module: Module) => void }) {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
 
@@ -68,68 +69,89 @@ function LoginScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center justify-center p-4">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-[var(--bg-secondary)] p-10 rounded-3xl shadow-2xl border border-[var(--border-color)] text-center neon-border z-10"
-      >
-        <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_20px_rgba(0,243,255,0.4)]">
-          <Brain className="w-10 h-10 text-[var(--neon-cyan,white)]" />
+    <div className="min-h-screen bg-transparent flex flex-col items-center justify-between p-4 relative">
+      {/* Header */}
+      <header className="w-full max-w-7xl mx-auto flex items-center justify-between p-4 md:p-6 z-20">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.4)]">
+            <Brain className="w-6 h-6 text-[var(--neon-cyan,white)]" />
+          </div>
+          <span className="font-bold text-xl neon-text-gradient hidden sm:block">Neuro Engine AI</span>
         </div>
-        <h1 className="text-3xl font-bold mb-2 neon-text-gradient">Neuro Engine AI</h1>
-        <p className="text-[var(--text-secondary)] mb-8">
-          {isSignUp 
-            ? "Create your account to start generating high-converting assets." 
-            : "The ultimate AI toolkit for high-converting marketing assets."}
-        </p>
-        
-        <button
-          onClick={handleLogin}
-          disabled={loading}
-          className="w-full py-4 bg-[var(--neon-cyan)] text-black rounded-xl font-bold hover:opacity-90 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-[0_0_15px_rgba(0,243,255,0.3)]"
+        <div className="flex items-center gap-4">
+          <ThemeToggle />
+        </div>
+      </header>
+
+      <main className="flex-1 flex flex-col items-center justify-center w-full max-w-7xl mx-auto">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md w-full bg-[var(--bg-secondary)] p-10 rounded-3xl shadow-2xl border border-[var(--border-color)] text-center neon-border z-10"
         >
-          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
-          {isSignUp ? "Create Account with Google" : "Sign in with Google"}
-        </button>
-
-        <div className="mt-6 flex flex-col gap-4">
-          <button 
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-sm text-[var(--neon-cyan)] hover:underline transition-all"
-          >
-            {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Create one"}
-          </button>
+          <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_20px_rgba(0,243,255,0.4)]">
+            <Brain className="w-10 h-10 text-[var(--neon-cyan,white)]" />
+          </div>
+          <h1 className="text-3xl font-bold mb-2 neon-text-gradient">Neuro Engine AI</h1>
+          <p className="text-[var(--text-secondary)] mb-8">
+            {isSignUp 
+              ? "Create your account to start generating high-converting assets." 
+              : "The ultimate AI toolkit for high-converting marketing assets."}
+          </p>
           
-          <p className="text-xs text-[var(--text-secondary)]">
-            By {isSignUp ? "creating an account" : "signing in"}, you agree to our Terms of Service and Privacy Policy.
-          </p>
-        </div>
-      </motion.div>
+          <button
+            onClick={handleLogin}
+            disabled={loading}
+            className="w-full py-4 bg-[var(--neon-cyan)] text-black rounded-xl font-bold hover:opacity-90 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-[0_0_15px_rgba(0,243,255,0.3)]"
+          >
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
+            {isSignUp ? "Create Account with Google" : "Sign in with Google"}
+          </button>
 
-      {/* SEO Content Section (Visible to Crawlers) */}
-      <section className="mt-16 max-w-4xl w-full grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-white">Neuromarketing AI</h2>
-          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-            Leverage advanced psychological triggers to create content that resonates with the subconscious mind and drives action.
-          </p>
-        </div>
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-white">SEO Optimized</h2>
-          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-            Generate high-ranking articles and ad copies designed to dominate search results and answer engine queries.
-          </p>
-        </div>
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-white">Affiliate Ready</h2>
-          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-            Specialized tools for bridge pages, offer angles, and competitor intelligence to scale your affiliate marketing business.
-          </p>
-        </div>
-      </section>
+          <div className="mt-6 flex flex-col gap-4">
+            <button 
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-sm text-[var(--neon-cyan)] hover:underline transition-all"
+            >
+              {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Create one"}
+            </button>
+            
+            <p className="text-xs text-[var(--text-secondary)]">
+              By {isSignUp ? "creating an account" : "signing in"}, you agree to our Terms of Service and Privacy Policy.
+            </p>
+          </div>
+        </motion.div>
 
-      <footer className="mt-16 text-[var(--text-secondary)] text-xs">
+        {/* SEO Content Section (Visible to Crawlers) */}
+        <section className="mt-16 max-w-4xl w-full grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold text-[var(--text-primary)]">Neuromarketing AI</h2>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              Leverage advanced psychological triggers to create content that resonates with the subconscious mind and drives action.
+            </p>
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold text-[var(--text-primary)]">SEO Optimized</h2>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              Generate high-ranking articles and ad copies designed to dominate search results and answer engine queries.
+            </p>
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold text-[var(--text-primary)]">Affiliate Ready</h2>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              Specialized tools for bridge pages, offer angles, and competitor intelligence to scale your affiliate marketing business.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full max-w-7xl mx-auto mt-16 py-8 border-t border-[var(--border-color)] flex flex-col items-center gap-4 text-sm text-[var(--text-secondary)] z-20">
+        <div className="flex gap-6">
+          <button onClick={() => onNavigate('privacy-policy')} className="hover:text-[var(--neon-cyan)] transition-colors">Privacy Policy</button>
+          <button onClick={() => onNavigate('terms-conditions')} className="hover:text-[var(--neon-cyan)] transition-colors">Terms & Conditions</button>
+          <button onClick={() => onNavigate('contact-us')} className="hover:text-[var(--neon-cyan)] transition-colors">Contact Us</button>
+        </div>
         <p>© 2026 Neuro Engine AI. All rights reserved.</p>
       </footer>
     </div>
@@ -139,6 +161,7 @@ function LoginScreen() {
 export default function App() {
   return (
     <ThemeProvider>
+      <BackgroundAnimation />
       <AppContent />
     </ThemeProvider>
   );
@@ -249,7 +272,7 @@ function AppContent() {
 
   if (!authReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)]">
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
         <div className="relative">
           <Loader2 className="w-12 h-12 animate-spin text-[var(--neon-cyan)]" />
           <div className="absolute inset-0 blur-xl bg-[var(--neon-cyan)]/20 animate-pulse" />
@@ -259,7 +282,31 @@ function AppContent() {
   }
 
   if (!user) {
-    return <LoginScreen />;
+    if (activeModule === 'privacy-policy') {
+      return (
+        <div className="min-h-screen bg-transparent flex flex-col p-6 text-[var(--text-primary)]">
+          <button onClick={() => setActiveModule('dashboard')} className="mb-4 text-[var(--neon-cyan)] self-start hover:underline">← Back to Login</button>
+          <PrivacyPolicy />
+        </div>
+      );
+    }
+    if (activeModule === 'terms-conditions') {
+      return (
+        <div className="min-h-screen bg-transparent flex flex-col p-6 text-[var(--text-primary)]">
+          <button onClick={() => setActiveModule('dashboard')} className="mb-4 text-[var(--neon-cyan)] self-start hover:underline">← Back to Login</button>
+          <TermsAndConditions />
+        </div>
+      );
+    }
+    if (activeModule === 'contact-us') {
+      return (
+        <div className="min-h-screen bg-transparent flex flex-col p-6 text-[var(--text-primary)]">
+          <button onClick={() => setActiveModule('dashboard')} className="mb-4 text-[var(--neon-cyan)] self-start hover:underline">← Back to Login</button>
+          <ContactUs />
+        </div>
+      );
+    }
+    return <LoginScreen onNavigate={setActiveModule} />;
   }
 
   if (!isMobileVerified) {
@@ -298,7 +345,7 @@ function AppContent() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col lg:flex-row font-sans text-[var(--text-primary)] relative transition-colors duration-300">
+      <div className="min-h-screen bg-transparent flex flex-col lg:flex-row font-sans text-[var(--text-primary)] relative transition-colors duration-300">
         {/* Mobile Header */}
         <header className="lg:hidden bg-[var(--bg-secondary)] border-b border-[var(--border-color)] p-4 flex items-center justify-between sticky top-0 z-40 neon-border">
           <div className="flex items-center gap-3">
