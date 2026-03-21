@@ -1,0 +1,9 @@
+{
+  "name": "Neuro Engine",
+  "description": "AI-powered marketing architect and asset generator using neuromarketing and SEO strategies.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}

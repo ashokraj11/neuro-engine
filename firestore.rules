@@ -1,0 +1,278 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId} (Auth UID)
+    // Fields:
+    //   - uid: string (required) - Auth UID
+    //   - email: string (required) - User email
+    //   - displayName: string (optional)
+    //   - photoURL: string (optional)
+    //   - role: string (required) - 'admin' or 'user'
+    //   - phoneNumber: string (optional) - Verified phone number
+    //   - customApiKey: string (optional) - User provided Gemini API Key
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: assets
+    // Document ID: {assetId} (Auto-generated)
+    // Fields:
+    //   - userId: string (required) - Owner UID
+    //   - type: string (required) - 'blog', 'reel', or 'ads'
+    //   - title: string (required)
+    //   - content: map (required) - Generated content
+    //   - metadata: map (optional) - Generation inputs
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: learning
+    // Document ID: {courseId} (Auto-generated)
+    // Fields:
+    //   - title: string (required)
+    //   - description: string (required)
+    //   - thumbnailUrl: string (required)
+    //   - youtubeUrl: string (optional)
+    //   - targetLink: string (optional)
+    //   - category: string (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: course_clicks
+    // Document ID: {clickId} (Auto-generated)
+    // Fields:
+    //   - userId: string (required) - User UID
+    //   - userEmail: string (required) - User email
+    //   - courseId: string (required) - Course ID
+    //   - timestamp: timestamp (required)
+    //
+    // Collection: module_visibility
+    // Document ID: {moduleId}
+    // Fields:
+    //   - id: string (required)
+    //   - isVisibleForAll: bool (required)
+    //   - visibleForUsers: list (required) - List of user UIDs
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    function isMasterAdmin() {
+      return isAuthenticated() && 
+        (
+          request.auth.token.email == "mail2ashokrajj@gmail.com" ||
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'master')
+        );
+    }
+
+    function isSubAdmin() {
+      return isAuthenticated() && 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'sub');
+    }
+
+    function isAdmin() {
+      return isMasterAdmin() || isSubAdmin();
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUserForCreate(data) {
+      return hasOnlyAllowedFields(['uid', 'email', 'displayName', 'photoURL', 'role', 'phoneNumber', 'customApiKey', 'createdAt']) &&
+             (isAdmin() || data.uid == request.auth.uid) &&
+             isValidEmail(data.email) &&
+             data.role in ['user', 'sub', 'master'] &&
+             (!('phoneNumber' in data) || (data.phoneNumber is string && data.phoneNumber.size() > 0 && data.phoneNumber.size() < 20)) &&
+             (!('customApiKey' in data) || (data.customApiKey is string && data.customApiKey.size() < 200)) &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidUserForUpdate(data) {
+      return hasOnlyAllowedFields(['uid', 'email', 'displayName', 'photoURL', 'role', 'phoneNumber', 'customApiKey', 'createdAt']) &&
+             (!('uid' in data) || data.uid == request.auth.uid || isAdmin()) &&
+             (!('email' in data) || isValidEmail(data.email)) &&
+             (!('role' in data) || data.role in ['user', 'sub', 'master']) &&
+             (!('phoneNumber' in data) || (data.phoneNumber is string && data.phoneNumber.size() > 0 && data.phoneNumber.size() < 20)) &&
+             (!('customApiKey' in data) || (data.customApiKey is string && data.customApiKey.size() < 200)) &&
+             (!('createdAt' in data) || data.createdAt is timestamp);
+    }
+
+    function isValidAsset(data) {
+      return hasOnlyAllowedFields(['userId', 'type', 'title', 'content', 'metadata', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.type in ['blog', 'reel', 'ads', 'email', 'landing'] &&
+             data.title is string && data.title.size() < 200 &&
+             data.content is map &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidCourse(data) {
+      return hasOnlyAllowedFields(['title', 'description', 'thumbnailUrl', 'youtubeUrl', 'targetLink', 'category', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.description is string && data.description.size() < 5000 &&
+             data.thumbnailUrl is string &&
+             (!('youtubeUrl' in data) || data.youtubeUrl is string) &&
+             (!('targetLink' in data) || data.targetLink is string) &&
+             (!('category' in data) || data.category is string) &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidClick(data) {
+      return hasOnlyAllowedFields(['userId', 'userEmail', 'courseId', 'timestamp']) &&
+             data.userId == request.auth.uid &&
+             isValidEmail(data.userEmail) &&
+             data.userEmail == request.auth.token.email &&
+             data.courseId is string && data.courseId.size() > 0 &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidTool(data) {
+      return hasOnlyAllowedFields(['name', 'description', 'icon', 'link', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+             data.description is string && data.description.size() < 1000 &&
+             data.icon is string && data.icon.size() < 50 &&
+             data.link is string && data.link.size() < 1000 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidTemplate(data) {
+      return hasOnlyAllowedFields(['name', 'type', 'size', 'downloadUrl', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+             data.type is string && data.type.size() < 50 &&
+             data.size is string && data.size.size() < 50 &&
+             data.downloadUrl is string && data.downloadUrl.size() < 1000 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidBlogPost(data) {
+      return hasOnlyAllowedFields(['title', 'date', 'author', 'imageUrl', 'content', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.date is string && data.date.size() < 50 &&
+             data.author is string && data.author.size() < 100 &&
+             data.imageUrl is string && data.imageUrl.size() < 1000 &&
+             data.content is string && data.content.size() < 50000 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidModuleVisibility(data) {
+      return hasOnlyAllowedFields(['id', 'isVisibleForAll', 'visibleForUsers']) &&
+             data.id is string &&
+             data.isVisibleForAll is bool &&
+             data.visibleForUsers is list;
+    }
+
+    function isValidBrandVoice(data) {
+      return hasOnlyAllowedFields(['examples', 'tone', 'productDetails', 'logoUrl', 'colors', 'updatedAt']) &&
+             (!('examples' in data) || (data.examples is string && data.examples.size() < 5000)) &&
+             (!('tone' in data) || (data.tone is string && data.tone.size() < 500)) &&
+             (!('productDetails' in data) || (data.productDetails is string && data.productDetails.size() < 5000)) &&
+             (!('logoUrl' in data) || (data.logoUrl is string && data.logoUrl.size() < 500000)) &&
+             (!('colors' in data) || (data.colors is list && data.colors.size() <= 10)) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidCustomerAvatar(data) {
+      return hasOnlyAllowedFields(['name', 'description', 'fears', 'desires', 'jobsToBeDone', 'vocabulary', 'psychologicalTriggers', 'updatedAt']) &&
+             data.name is string && data.name.size() < 200 &&
+             data.description is string && data.description.size() < 2000 &&
+             data.fears is string && data.fears.size() < 5000 &&
+             data.desires is string && data.desires.size() < 5000 &&
+             data.jobsToBeDone is string && data.jobsToBeDone.size() < 5000 &&
+             data.vocabulary is string && data.vocabulary.size() < 5000 &&
+             data.psychologicalTriggers is string && data.psychologicalTriggers.size() < 5000 &&
+             data.updatedAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users {
+      allow list: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isMasterAdmin() && isValidUserForCreate(request.resource.data);
+      allow update: if isAuthenticated() && isValidUserForUpdate(request.resource.data) && 
+                      (isMasterAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role));
+      allow delete: if isMasterAdmin();
+    }
+
+    match /users/{userId}/settings/{settingId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) && 
+                            (settingId == 'brandVoice' ? isValidBrandVoice(request.resource.data) : 
+                             settingId == 'customerAvatar' ? isValidCustomerAvatar(request.resource.data) : true);
+    }
+
+    match /assets/{assetId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidAsset(request.resource.data);
+      allow update: if isAuthenticated() && isValidAsset(request.resource.data) && isDocOwner();
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /learning/{courseId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin() && isValidCourse(request.resource.data);
+      allow update: if isAdmin() && isValidCourse(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /tools/{toolId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /templates/{templateId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /blog/{postId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /course_clicks/{clickId} {
+      allow create: if isAuthenticated() && isValidClick(request.resource.data);
+      allow read: if isAdmin();
+    }
+
+    match /module_visibility/{moduleId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidModuleVisibility(request.resource.data);
+    }
+
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

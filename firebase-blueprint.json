@@ -1,0 +1,151 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user profile information and settings.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "customApiKey": { "type": "string", "description": "User provided Gemini API Key" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "MarketingAsset": {
+      "title": "Marketing Asset",
+      "description": "A generated marketing asset (blog, reel, or ad set).",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["blog", "reel", "ads"] },
+        "title": { "type": "string" },
+        "content": { "type": "object", "description": "The actual generated data" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "metadata": { "type": "object", "description": "Input parameters used for generation" }
+      },
+      "required": ["userId", "type", "content", "createdAt"]
+    },
+    "Course": {
+      "title": "Learning Course",
+      "description": "A course in the learning module.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "thumbnailUrl": { "type": "string" },
+        "youtubeUrl": { "type": "string" },
+        "targetLink": { "type": "string" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "thumbnailUrl", "createdAt"]
+    },
+    "Tool": {
+      "title": "Marketing Tool",
+      "description": "An interactive tool in the learning module.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "icon": { "type": "string" },
+        "link": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "description", "icon", "link", "createdAt"]
+    },
+    "Template": {
+      "title": "Resource Template",
+      "description": "A downloadable template or PDF.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "size": { "type": "string" },
+        "downloadUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "type", "size", "downloadUrl", "createdAt"]
+    },
+    "BlogPost": {
+      "title": "Blog Post",
+      "description": "A blog post for the learning module.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "author": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "date", "author", "imageUrl", "content", "createdAt"]
+    },
+    "BrandVoice": {
+      "title": "Brand Voice DNA",
+      "description": "Stores user's brand voice settings.",
+      "type": "object",
+      "properties": {
+        "tone": { "type": "string" },
+        "examples": { "type": "string" },
+        "productDetails": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "colors": { "type": "array", "items": { "type": "string" } },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "CustomerAvatar": {
+      "title": "Customer Avatar DNA",
+      "description": "Stores user's target customer persona.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "fears": { "type": "string" },
+        "desires": { "type": "string" },
+        "jobsToBeDone": { "type": "string" },
+        "vocabulary": { "type": "string" },
+        "psychologicalTriggers": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents"
+    },
+    "/users/{userId}/settings/brandVoice": {
+      "schema": "BrandVoice",
+      "description": "User's brand voice settings"
+    },
+    "/users/{userId}/settings/customerAvatar": {
+      "schema": "CustomerAvatar",
+      "description": "User's customer avatar settings"
+    },
+    "/assets/{assetId}": {
+      "schema": "MarketingAsset",
+      "description": "Collection of all generated marketing assets"
+    },
+    "/learning/{courseId}": {
+      "schema": "Course",
+      "description": "Educational courses"
+    },
+    "/tools/{toolId}": {
+      "schema": "Tool",
+      "description": "Marketing tools"
+    },
+    "/templates/{templateId}": {
+      "schema": "Template",
+      "description": "Downloadable templates"
+    },
+    "/blog/{postId}": {
+      "schema": "BlogPost",
+      "description": "Blog posts"
+    }
+  }
+}

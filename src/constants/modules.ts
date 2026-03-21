@@ -1,0 +1,23 @@
+import { LayoutDashboard, Target, FileText, Share2, Video, Megaphone, LayoutTemplate, BookOpen, Layers, Funnel, Mail, MessageSquare, Wand2, Sparkles, ShieldCheck, Brain } from 'lucide-react';
+
+export const MODULE_LIST = [
+  { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, category: 'main' },
+  { id: 'niche', name: 'Niche Generator', icon: Target, category: 'generator' },
+  { id: 'blog', name: 'Blog Generator', icon: FileText, category: 'generator' },
+  { id: 'social-media', name: 'Social Media Post', icon: Share2, category: 'generator' },
+  { id: 'reels', name: 'Reels Generator', icon: Video, category: 'generator' },
+  { id: 'ads', name: 'Ads Generator', icon: Megaphone, category: 'generator' },
+  { id: 'landing', name: 'Landing Page Generator', icon: LayoutTemplate, category: 'generator' },
+  { id: 'lead-magnet', name: 'Lead Magnet Generator', icon: BookOpen, category: 'generator' },
+  { id: 'omnichannel', name: 'Campaign Generator', icon: Layers, category: 'generator' },
+  { id: 'sales-funnel', name: 'Sales Funnel Generator', icon: Funnel, category: 'generator' },
+  { id: 'email', name: 'Email Swipes Generator', icon: Mail, category: 'generator' },
+  { id: 'whatsapp', name: 'Whatsapp Swipe Generator', icon: MessageSquare, category: 'generator' },
+  { id: 'bridge-page', name: 'Bridge Page Generator', icon: Wand2, category: 'affiliate' },
+  { id: 'offer-angle', name: 'Offer Angle Intelligence', icon: Sparkles, category: 'affiliate' },
+  { id: 'ad-policy', name: 'Ad Policy Compliance', icon: ShieldCheck, category: 'affiliate' },
+  { id: 'competitor-intelligence', name: 'Competitor Intelligence', icon: Target, category: 'affiliate' },
+  { id: 'learning', name: 'Learning', icon: BookOpen, category: 'other' },
+  { id: 'brand-voice', name: 'Brand Voice DNA', icon: Brain, category: 'other' },
+  { id: 'admin', name: 'Admin', icon: ShieldCheck, category: 'other', adminOnly: true },
+];
