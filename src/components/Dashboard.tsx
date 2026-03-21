@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
-import { collection, query, where, orderBy, onSnapshot, Timestamp, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, Timestamp, deleteDoc, doc, limit } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
-import { FileText, Video, Megaphone, Calendar, Clock, ChevronRight, Search, Filter, Trash2, ExternalLink, Loader2, Copy, Check, Image as ImageIcon, Download, Mail, LayoutTemplate, MessageSquare, Target, Sparkles, Layers } from 'lucide-react';
+import { FileText, Video, Megaphone, Calendar, Clock, ChevronRight, Search, Filter, Trash2, ExternalLink, Loader2, Copy, Check, Image as ImageIcon, Download, Mail, LayoutTemplate, MessageSquare, Target, Sparkles, Layers, BookOpen, Wrench, Newspaper } from 'lucide-react';
 import { cn, downloadImage } from '../lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -17,8 +17,23 @@ interface Asset {
   createdAt: Timestamp;
 }
 
-export function Dashboard() {
+interface LatestUpdate {
+  id: string;
+  title?: string;
+  name?: string;
+  description?: string;
+  createdAt: Timestamp;
+  type: 'course' | 'tool' | 'blog';
+  link?: string;
+  thumbnailUrl?: string;
+  imageUrl?: string;
+}
+
+export function Dashboard({ onNavigate }: { onNavigate: (module: any, state?: any) => void }) {
   const [assets, setAssets] = useState<Asset[]>([]);
+  const [latestCourses, setLatestCourses] = useState<LatestUpdate[]>([]);
+  const [latestTools, setLatestTools] = useState<LatestUpdate[]>([]);
+  const [latestBlogs, setLatestBlogs] = useState<LatestUpdate[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -53,6 +68,29 @@ export function Dashboard() {
     });
 
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const qCourses = query(collection(db, 'learning'), orderBy('createdAt', 'desc'), limit(5));
+    const unsubCourses = onSnapshot(qCourses, (snap) => {
+      setLatestCourses(snap.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'course' } as LatestUpdate)));
+    });
+
+    const qTools = query(collection(db, 'tools'), orderBy('createdAt', 'desc'), limit(5));
+    const unsubTools = onSnapshot(qTools, (snap) => {
+      setLatestTools(snap.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'tool' } as LatestUpdate)));
+    });
+
+    const qBlogs = query(collection(db, 'blog'), orderBy('createdAt', 'desc'), limit(5));
+    const unsubBlogs = onSnapshot(qBlogs, (snap) => {
+      setLatestBlogs(snap.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'blog' } as LatestUpdate)));
+    });
+
+    return () => {
+      unsubCourses();
+      unsubTools();
+      unsubBlogs();
+    };
   }, []);
 
   useEffect(() => {
@@ -209,6 +247,114 @@ export function Dashboard() {
 
   return (
     <div className="space-y-8">
+      {/* Latest Updates Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Latest Courses */}
+        <div className="bg-[var(--bg-secondary)] p-6 rounded-3xl neon-border shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-cyan-400" />
+              Latest Courses
+            </h3>
+            <span className="text-[10px] font-bold text-cyan-500/50">NEW</span>
+          </div>
+          <div className="space-y-3">
+            {latestCourses.length > 0 ? latestCourses.map(course => (
+              <div 
+                key={course.id} 
+                onClick={() => onNavigate('learning', { tab: 'video' })}
+                className="group flex items-center gap-3 p-2 rounded-xl hover:bg-[var(--bg-primary)] transition-all cursor-pointer border border-transparent hover:border-cyan-500/20"
+              >
+                <div className="w-10 h-10 rounded-lg bg-cyan-950/30 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {course.thumbnailUrl ? (
+                    <img src={course.thumbnailUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <BookOpen className="w-5 h-5 text-cyan-500" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-[var(--text-primary)] truncate group-hover:text-cyan-400 transition-colors">{course.title}</p>
+                  <p className="text-[10px] text-[var(--text-secondary)] truncate">{course.createdAt?.toDate().toLocaleDateString()}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-[var(--text-secondary)] group-hover:text-cyan-400" />
+              </div>
+            )) : (
+              <p className="text-xs text-[var(--text-secondary)] text-center py-4">No courses available yet.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Latest Tools */}
+        <div className="bg-[var(--bg-secondary)] p-6 rounded-3xl neon-border shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
+              <Wrench className="w-4 h-4 text-emerald-400" />
+              Latest Tools
+            </h3>
+            <span className="text-[10px] font-bold text-emerald-500/50">NEW</span>
+          </div>
+          <div className="space-y-3">
+            {latestTools.length > 0 ? latestTools.map(tool => (
+              <div 
+                key={tool.id} 
+                onClick={() => onNavigate('learning', { tab: 'tools' })}
+                className="group flex items-center gap-3 p-2 rounded-xl hover:bg-[var(--bg-primary)] transition-all cursor-pointer border border-transparent hover:border-emerald-500/20"
+              >
+                <div className="w-10 h-10 rounded-lg bg-emerald-950/30 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {tool.imageUrl ? (
+                    <img src={tool.imageUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <Wrench className="w-5 h-5 text-emerald-500" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-[var(--text-primary)] truncate group-hover:text-emerald-400 transition-colors">{tool.name}</p>
+                  <p className="text-[10px] text-[var(--text-secondary)] truncate">{tool.createdAt?.toDate().toLocaleDateString()}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-[var(--text-secondary)] group-hover:text-emerald-400" />
+              </div>
+            )) : (
+              <p className="text-xs text-[var(--text-secondary)] text-center py-4">No tools available yet.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Latest Blogs */}
+        <div className="bg-[var(--bg-secondary)] p-6 rounded-3xl neon-border shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest flex items-center gap-2">
+              <Newspaper className="w-4 h-4 text-purple-400" />
+              Latest Blogs
+            </h3>
+            <span className="text-[10px] font-bold text-purple-500/50">NEW</span>
+          </div>
+          <div className="space-y-3">
+            {latestBlogs.length > 0 ? latestBlogs.map(blog => (
+              <div 
+                key={blog.id} 
+                onClick={() => onNavigate('learning', { tab: 'blog' })}
+                className="group flex items-center gap-3 p-2 rounded-xl hover:bg-[var(--bg-primary)] transition-all cursor-pointer border border-transparent hover:border-purple-500/20"
+              >
+                <div className="w-10 h-10 rounded-lg bg-purple-950/30 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {blog.imageUrl ? (
+                    <img src={blog.imageUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <Newspaper className="w-5 h-5 text-purple-500" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-[var(--text-primary)] truncate group-hover:text-purple-400 transition-colors">{blog.title}</p>
+                  <p className="text-[10px] text-[var(--text-secondary)] truncate">{blog.createdAt?.toDate().toLocaleDateString()}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-[var(--text-secondary)] group-hover:text-purple-400" />
+              </div>
+            )) : (
+              <p className="text-xs text-[var(--text-secondary)] text-center py-4">No blogs available yet.</p>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Search and Filter */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-[var(--bg-secondary)] p-4 rounded-2xl neon-border shadow-sm">
         <div className="relative w-full md:w-96">

@@ -44,7 +44,7 @@ interface BlogPost {
 
 type TabType = 'video' | 'tools' | 'templates' | 'blog';
 
-export function LearningModule() {
+export function LearningModule({ initialTab }: { initialTab?: TabType }) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [tools, setTools] = useState<Tool[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -52,7 +52,11 @@ export function LearningModule() {
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [activeTab, setActiveTab] = useState<TabType>('video');
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab || 'video');
+
+  useEffect(() => {
+    if (initialTab) setActiveTab(initialTab);
+  }, [initialTab]);
 
   useEffect(() => {
     const q = query(collection(db, 'learning'), orderBy('createdAt', 'desc'));

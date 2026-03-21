@@ -21,6 +21,8 @@ import { Dashboard } from './components/Dashboard';
 import { MobileVerification } from './components/MobileVerification';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SettingsModal } from './components/SettingsModal';
+import { SupportChatbot } from './components/SupportChatbot';
+import { ApiKeyReminder } from './components/ApiKeyReminder';
 import { ThemeProvider } from './context/ThemeContext';
 import { ThemeToggle } from './components/ThemeToggle';
 import { auth, loginWithGoogle, logout, db, handleFirestoreError, OperationType } from './firebase';
@@ -108,6 +110,7 @@ export default function App() {
 
 function AppContent() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard');
+  const [dashboardNavState, setDashboardNavState] = useState<{ tab: string } | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<'master' | 'sub' | 'user'>('user');
   const [isMobileVerified, setIsMobileVerified] = useState(false);
@@ -563,7 +566,14 @@ function AppContent() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              {activeModule === 'dashboard' && <Dashboard />}
+              {activeModule === 'dashboard' && (
+                <Dashboard 
+                  onNavigate={(module, state) => {
+                    setActiveModule(module);
+                    setDashboardNavState(state);
+                  }} 
+                />
+              )}
               {activeModule === 'blog' && <BlogGenerator />}
               {activeModule === 'social-media' && <SocialMediaPostGenerator />}
               {activeModule === 'reels' && <ReelsGenerator />}
@@ -580,13 +590,17 @@ function AppContent() {
               {activeModule === 'ad-policy' && <AdPolicyChecker />}
               {activeModule === 'competitor-intelligence' && <CompetitorIntelligence />}
               {activeModule === 'brand-voice' && <BrandVoiceManager />}
-              {activeModule === 'learning' && <LearningModule />}
+              {activeModule === 'learning' && (
+                <LearningModule initialTab={dashboardNavState?.tab as any} />
+              )}
               {activeModule === 'admin' && <AdminModule isMaster={isMaster} />}
             </motion.div>
           </AnimatePresence>
         </main>
 
         <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+        <SupportChatbot />
+        <ApiKeyReminder onOpenSettings={() => setIsSettingsOpen(true)} />
       </div>
     </ErrorBoundary>
   );
