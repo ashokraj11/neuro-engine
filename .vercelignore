@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.env.local
+.env.*.local
+*.log
+firebase-blueprint.json
+firestore.rules
+firebase.json
+.firebaserc
+server.ts
+update_gemini.cjs
