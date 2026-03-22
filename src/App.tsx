@@ -122,8 +122,28 @@ function LoginScreen({ onNavigate }: { onNavigate: (module: Module) => void }) {
           </div>
         </motion.div>
 
+        {/* Marketing Insight Section */}
+        <section className="mt-16 max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-6 z-10 px-4">
+          <div className="bg-[var(--bg-secondary)] border-2 border-orange-500/80 rounded-2xl p-8 text-center shadow-lg hover:shadow-orange-500/10 transition-shadow">
+            <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-4 tracking-wide uppercase leading-tight">
+              What Most<br/>People Think
+            </h2>
+            <p className="text-[var(--text-secondary)] text-lg md:text-xl leading-relaxed">
+              The hardest part is finding the perfect offer, building a website, or spending money on paid ads
+            </p>
+          </div>
+          <div className="bg-[var(--bg-secondary)] border-2 border-orange-500/80 rounded-2xl p-8 text-center shadow-lg hover:shadow-orange-500/10 transition-shadow">
+            <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-4 tracking-wide uppercase leading-tight">
+              The Real<br/>Problem
+            </h2>
+            <p className="text-[var(--text-secondary)] text-lg md:text-xl leading-relaxed">
+              The real struggle isn't finding offers or spending money — it's marketing the offer the right way.
+            </p>
+          </div>
+        </section>
+
         {/* SEO Content Section (Visible to Crawlers) */}
-        <section className="mt-16 max-w-4xl w-full grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+        <section className="mt-16 max-w-4xl w-full grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left px-4">
           <div className="space-y-3">
             <h2 className="text-lg font-bold text-[var(--text-primary)]">Neuromarketing AI</h2>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">

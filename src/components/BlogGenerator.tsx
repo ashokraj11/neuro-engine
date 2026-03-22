@@ -6,7 +6,7 @@ import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/fires
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import { Loader2, FileText, Globe, Link as LinkIcon, Hash, Type as TypeIcon, AlignLeft, Download, Image as ImageIcon } from 'lucide-react';
+import { Loader2, FileText, Globe, Link as LinkIcon, Hash, Type as TypeIcon, AlignLeft, Download, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { downloadImage } from '../lib/utils';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
 import { AdSense } from './AdSense';
@@ -23,6 +23,7 @@ export function BlogGenerator() {
     primaryKeyword: '',
     secondaryKeywords: '',
     blogType: 'Review',
+    psychTrigger: 'none',
     wordCount: 1000
       });
   const [brandVoice, setBrandVoice] = useState<{ tone: string, examples: string } | null>(null);
@@ -185,6 +186,24 @@ export function BlogGenerator() {
                 <option>Problem/Solution</option>
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-cyan-500" /> Psychological Trigger (Cognitive Bias)
+            </label>
+            <select
+              className="w-full px-4 py-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-[var(--text-primary)]"
+              value={formData.psychTrigger}
+              onChange={e => setFormData({ ...formData, psychTrigger: e.target.value })}
+            >
+              <option value="none">Standard Neuro-Optimization</option>
+              <option value="loss-aversion">Loss Aversion (Fear of Missing Out)</option>
+              <option value="social-proof">Social Proof (Herd Mentality)</option>
+              <option value="authority">Authority Bias (Expert Endorsement)</option>
+              <option value="dopamine">Dopamine Loop (Curiosity Hooks)</option>
+              <option value="scarcity">Scarcity (Limited Availability)</option>
+            </select>
           </div>
 
           <div>

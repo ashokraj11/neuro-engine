@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { geminiService } from '../services/geminiService';
+import { trackGeneratorClick } from '../utils/tracking';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, limit } from 'firebase/firestore';
-import { Loader2, LayoutTemplate, Link as LinkIcon, TypeIcon, Copy, Check, Eye, Download, X, Layout } from 'lucide-react';
+import { Loader2, LayoutTemplate, Link as LinkIcon, TypeIcon, Copy, Check, Eye, Download, X, Layout, Sparkles } from 'lucide-react';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
 import { landingPageTemplates } from '../utils/htmlTemplates';
 
 export function LandingPageGenerator() {
   const [formData, setFormData] = useState({
     url: '',
-    productDetails: ''
-      });
+    productDetails: '',
+    psychTrigger: 'none'
+  });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState(false);
@@ -92,7 +94,8 @@ export function LandingPageGenerator() {
         ...formData,
         userApiKey,
         brandVoice: useBrandVoice ? brandVoice : null,
-        framework
+        framework,
+        psychTrigger: formData.psychTrigger
       });
       setResult(landingPage);
       setCritique(null);
@@ -229,6 +232,25 @@ Final CTA: ${result.finalCTA}
               onToggle={setUseBrandVoice}
             />
           )}
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-blue-500" />
+              Psychological Trigger (Cognitive Bias)
+            </label>
+            <select
+              value={formData.psychTrigger}
+              onChange={(e) => setFormData({ ...formData, psychTrigger: e.target.value })}
+              className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-[var(--text-primary)]"
+            >
+              <option value="none">Standard Neuro-Digital Optimization</option>
+              <option value="loss-aversion">Loss Aversion (Fear of Missing Out)</option>
+              <option value="social-proof">Social Proof (Bandwagon Effect)</option>
+              <option value="authority">Authority (Expert Influence)</option>
+              <option value="dopamine">Dopamine Loop (Curiosity & Reward)</option>
+              <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
+            </select>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { geminiService } from '../services/geminiService';
+import { trackGeneratorClick } from '../utils/tracking';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { doc, getDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { compileVideo } from '../lib/videoCompiler';
@@ -22,6 +23,7 @@ export function ReelsGenerator() {
   const [compiling, setCompiling] = useState(false);
   const [url, setUrl] = useState('');
   const [details, setDetails] = useState('');
+  const [psychTrigger, setPsychTrigger] = useState('none');
   const [sceneCount, setSceneCount] = useState(5);
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [currentStep, setCurrentStep] = useState<'idle' | 'scripting' | 'visualizing' | 'voicing' | 'ready'>('idle');
@@ -94,6 +96,7 @@ export function ReelsGenerator() {
         productDetails: details, 
         userApiKey, 
         sceneCount,
+        psychTrigger,
         brandVoice: useBrandVoice ? brandVoice || undefined : undefined
       });
       setScenes(sceneData);
@@ -185,6 +188,24 @@ export function ReelsGenerator() {
                 value={url}
                 onChange={e => setUrl(e.target.value)}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-indigo-400" /> Psychological Trigger (Cognitive Bias)
+              </label>
+              <select
+                value={psychTrigger}
+                onChange={e => setPsychTrigger(e.target.value)}
+                className="w-full px-4 py-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-[var(--text-primary)]"
+              >
+                <option value="none">Standard Neuro-Digital Optimization</option>
+                <option value="loss-aversion">Loss Aversion (Fear of Missing Out)</option>
+                <option value="social-proof">Social Proof (Bandwagon Effect)</option>
+                <option value="authority">Authority (Expert Influence)</option>
+                <option value="dopamine">Dopamine Loop (Curiosity & Reward)</option>
+                <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
+              </select>
             </div>
 
             <div>

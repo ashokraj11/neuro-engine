@@ -25,6 +25,7 @@ export function SocialMediaPostGenerator() {
     context: '',
     url: '',
     postAngle: 'Emotional Resonance',
+    psychTrigger: 'none',
     topicCount: 5,
     dimension: '4:5',
     language: 'English',
@@ -81,6 +82,7 @@ export function SocialMediaPostGenerator() {
       const topics = await geminiService.generateSocialMediaTopics({
         niche: 'Motivation',
         postAngle: formData.postAngle,
+        psychTrigger: formData.psychTrigger,
         context: formData.context || formData.url,
         count: formData.topicCount,
         brandVoice: useBrandVoice ? brandVoice || undefined : undefined,
@@ -119,6 +121,7 @@ export function SocialMediaPostGenerator() {
           dimension: formData.dimension,
           language: formData.language,
           postAngle: formData.postAngle,
+          psychTrigger: formData.psychTrigger,
           brandVoice: useBrandVoice ? brandVoice || undefined : undefined,
           userApiKey
         });
@@ -179,6 +182,24 @@ export function SocialMediaPostGenerator() {
             {mode === 'bulk' ? (
               <>
                 <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-cyan-500" />
+                      Psychological Trigger (Cognitive Bias)
+                    </label>
+                    <select
+                      value={formData.psychTrigger}
+                      onChange={(e) => setFormData({ ...formData, psychTrigger: e.target.value })}
+                      className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none text-[var(--text-primary)]"
+                    >
+                      <option value="none">Standard Neuro-Digital Optimization</option>
+                      <option value="loss-aversion">Loss Aversion (Fear of Missing Out)</option>
+                      <option value="social-proof">Social Proof (Bandwagon Effect)</option>
+                      <option value="authority">Authority (Expert Influence)</option>
+                      <option value="dopamine">Dopamine Loop (Curiosity & Reward)</option>
+                      <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
+                    </select>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">
                       <Target className="w-4 h-4" />

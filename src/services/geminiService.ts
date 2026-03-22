@@ -79,6 +79,23 @@ async function generateWithFallback(ai: any, params: any, models: string[], retr
   throw lastError;
 }
 
+const getTriggerInstruction = (trigger?: string) => {
+  switch (trigger) {
+    case 'loss-aversion':
+      return "CORE PSYCHOLOGICAL FRAMEWORK: LOSS AVERSION. Focus heavily on what the reader will lose by not taking action. Emphasize the pain of staying the same, the cost of missed opportunities, and the immediate risk of inaction. Use 'Fear of Missing Out' (FOMO) triggers effectively.";
+    case 'social-proof':
+      return "CORE PSYCHOLOGICAL FRAMEWORK: SOCIAL PROOF. Leverage the 'Herd Mentality'. Use language that implies a massive community is already benefiting. Reference (hypothetical) success stories, 'everyone is doing it' vibes, and the safety of following a proven path used by thousands.";
+    case 'authority':
+      return "CORE PSYCHOLOGICAL FRAMEWORK: AUTHORITY BIAS. Use an authoritative, expert-led tone. Reference (hypothetical) data points, industry standards, and 'expert consensus'. Position the product/service as the gold standard backed by deep research and elite results.";
+    case 'dopamine':
+      return "CORE PSYCHOLOGICAL FRAMEWORK: DOPAMINE LOOP. Use high-curiosity hooks, open loops, and 'cliffhanger' style writing. Keep the reader seeking the next piece of information. Use 'Did you know?' style facts and 'The secret to...' hooks that trigger a reward response in the brain.";
+    case 'scarcity':
+      return "CORE PSYCHOLOGICAL FRAMEWORK: SCARCITY. Focus on limited availability, exclusive access, and 'once-in-a-lifetime' opportunities. Create a sense of extreme urgency that the offer might vanish at any second.";
+    default:
+      return "CORE PSYCHOLOGICAL FRAMEWORK: Standard Neuro-Digital Optimization. Use a balanced mix of emotional and logical triggers.";
+  }
+};
+
 export const geminiService = {
   async generateBlog(params: {
     url: string;
@@ -89,15 +106,18 @@ export const geminiService = {
     blogType: string;
     wordCount: number;
     brandVoice?: BrandVoice;
-    
+    psychTrigger?: string;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
+
     const prompt = `
       ROLE
       You are a human-style blog writer, an elite SEO expert, and a neuromarketing strategist. Your goal is to produce blog articles that feel natural, conversational, and engaging for human readers while remaining clear, truthful, and useful.
       
       Task: Generate a high-converting marketing blog article.
+      
+      ${getTriggerInstruction(params.psychTrigger)}
       
       ${NEURODIGITAL_MARKETING_PRINCIPLES}
 
@@ -213,7 +233,7 @@ export const geminiService = {
     productDetails: string;
     funnelType: string;
     brandVoice?: BrandVoice;
-    
+    psychTrigger?: string;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -224,6 +244,8 @@ export const geminiService = {
       
       TASK
       Design a high-converting ${params.funnelType} sales funnel.
+      
+      ${getTriggerInstruction(params.psychTrigger)}
       
       ${NEURODIGITAL_MARKETING_PRINCIPLES}
 
@@ -292,6 +314,7 @@ export const geminiService = {
     targetAudience?: string;
     brandVoice?: BrandVoice;
     framework?: string;
+    psychTrigger?: string;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -301,6 +324,8 @@ export const geminiService = {
       
       TASK
       Generate a high-converting "Bridge Page" (pre-sell page) for an affiliate offer using the ${params.framework || 'PAS (Problem-Agitate-Solve)'} framework.
+      
+      ${getTriggerInstruction(params.psychTrigger)}
       
       ${getAvatarPrompt(params.brandVoice)}
 
@@ -360,7 +385,7 @@ export const geminiService = {
     offerUrl?: string;
     productDetails?: string;
     brandVoice?: BrandVoice;
-    
+    psychTrigger?: string;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -370,6 +395,8 @@ export const geminiService = {
       
       TASK
       Analyze the provided affiliate offer and generate 10 distinct, high-converting "Angles" to promote it.
+      
+      ${getTriggerInstruction(params.psychTrigger)}
       
       ${getAvatarPrompt(params.brandVoice)}
 
@@ -577,7 +604,7 @@ export const geminiService = {
     style: 'lifestyle' | 'ugc' | '3d-cartoon' | 'minimalist' | 'bold';
     aspectRatio: '1:1' | '9:16' | '16:9';
     brandVoice?: BrandVoice;
-    
+    psychTrigger?: string;
   }) {
     const ai = getAI(params.userApiKey);
     const prompt = `
@@ -585,6 +612,8 @@ export const geminiService = {
       Analyze the product: ${params.productDetails} and the provided Sales Page URL: ${params.url}
       
       Task: Generate ${params.mode === 'full' ? '5' : '2'} high-converting Meta Ad creatives using the "Meta Andromeda" strategy.
+      
+      ${getTriggerInstruction(params.psychTrigger)}
       
       ${getAvatarPrompt(params.brandVoice)}
 
@@ -647,7 +676,7 @@ export const geminiService = {
     return JSON.parse(response.text || "[]");
   },
 
-  async generateLandingPage(params: { url: string; productDetails: string; userApiKey?: string; brandVoice?: BrandVoice; framework?: string; }) {
+  async generateLandingPage(params: { url: string; productDetails: string; userApiKey?: string; brandVoice?: BrandVoice; framework?: string; psychTrigger?: string; }) {
     const ai = getAI(params.userApiKey);
     const prompt = `
       ROLE
@@ -655,6 +684,8 @@ export const geminiService = {
       
       TASK
       Create a high-converting landing page structure using the ${params.framework || 'AIDA (Attention-Interest-Desire-Action)'} framework.
+
+      ${getTriggerInstruction(params.psychTrigger)}
 
       Context:
       - Sales Page URL: ${params.url}
@@ -750,13 +781,15 @@ export const geminiService = {
 
     return JSON.parse(response.text || "{}");
   },
-  async generateEmailSwipes(params: { url: string; productDetails: string; userApiKey?: string; brandVoice?: BrandVoice;  }) {
+  async generateEmailSwipes(params: { url: string; productDetails: string; userApiKey?: string; brandVoice?: BrandVoice; psychTrigger?: string; }) {
     const ai = getAI(params.userApiKey);
     const prompt = `
       You are an elite neuro-copywriter specializing in high-converting email sequences.
       Create a 10-part email swipe sequence based on the following:
       - Sales Page URL: ${params.url}
       - Product Details: ${params.productDetails}
+      
+      ${getTriggerInstruction(params.psychTrigger)}
       
       ${NEURODIGITAL_MARKETING_PRINCIPLES}
 
@@ -822,13 +855,15 @@ export const geminiService = {
     return JSON.parse(response.text || "{}");
   },
 
-  async generateReelScript(params: { url: string; productDetails: string; userApiKey?: string; sceneCount?: number; brandVoice?: BrandVoice;  }) {
+  async generateReelScript(params: { url: string; productDetails: string; userApiKey?: string; sceneCount?: number; brandVoice?: BrandVoice; psychTrigger?: string; }) {
     const ai = getAI(params.userApiKey);
     const count = params.sceneCount || 5;
     const prompt = `
       ROLE
       You are a short-form video viral strategist and master of faceless video content.
       Analyze the product: ${params.productDetails} and the provided Sales Page URL: ${params.url}
+      
+      ${getTriggerInstruction(params.psychTrigger)}
       
       ${NEURODIGITAL_MARKETING_PRINCIPLES}
 
@@ -906,13 +941,15 @@ export const geminiService = {
     return null;
   },
 
-  async generateWhatsappSwipes(params: { url: string; productDetails: string; userApiKey?: string; brandVoice?: BrandVoice;  }) {
+  async generateWhatsappSwipes(params: { url: string; productDetails: string; userApiKey?: string; brandVoice?: BrandVoice; psychTrigger?: string; }) {
     const ai = getAI(params.userApiKey);
     const prompt = `
       You are an elite neuro-copywriter specializing in high-converting WhatsApp marketing.
       Create a 10-part WhatsApp swipe sequence based on the following:
       - Sales Page URL: ${params.url}
       - Product Details: ${params.productDetails}
+
+      ${getTriggerInstruction(params.psychTrigger)}
 
       ${getAvatarPrompt(params.brandVoice)}
 
@@ -995,7 +1032,7 @@ export const geminiService = {
     length: string;
     monetizationGoal: string;
     brandVoice?: BrandVoice;
-    
+    psychTrigger?: string;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -1010,6 +1047,8 @@ export const geminiService = {
       - Guide Type: ${params.guideType}
       - Length Target: ${params.length} (Short: ~3k words, Medium: ~7k words, Long: ~15k words)
       - Monetization Goal: ${params.monetizationGoal}
+
+      ${getTriggerInstruction(params.psychTrigger)}
 
       ${getAvatarPrompt(params.brandVoice)}
 
@@ -1188,7 +1227,7 @@ export const geminiService = {
     context?: string;
     count: number;
     brandVoice?: BrandVoice;
-    
+    psychTrigger?: string;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -1201,6 +1240,8 @@ export const geminiService = {
       - Niche: ${params.niche}
       - Post Angle (Neuromarketing): ${params.postAngle}
       - Context: ${params.context || "None provided"}
+
+      ${getTriggerInstruction(params.psychTrigger || 'none')}
 
       ${getAvatarPrompt(params.brandVoice)}
 
@@ -1246,7 +1287,7 @@ export const geminiService = {
     language: string;
     postAngle: string;
     brandVoice?: BrandVoice;
-    
+    psychTrigger?: string;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -1260,6 +1301,8 @@ export const geminiService = {
       Generate ready-to-post Instagram content for the topic: "${params.topic}".
       ${params.manualScript ? `Base the content on this script: "${params.manualScript}"` : ""}
       ${params.context ? `Additional context: "${params.context}"` : ""}
+
+      ${getTriggerInstruction(params.psychTrigger)}
 
       ${getAvatarPrompt(params.brandVoice)}
 

@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { geminiService } from '../services/geminiService';
+import { trackGeneratorClick } from '../utils/tracking';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, limit } from 'firebase/firestore';
-import { Loader2, Mail, Link as LinkIcon, Type as TypeIcon, Copy, Check } from 'lucide-react';
+import { Loader2, Mail, Link as LinkIcon, Type as TypeIcon, Copy, Check, Sparkles } from 'lucide-react';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
 
 export function EmailGenerator() {
   const [formData, setFormData] = useState({
     url: '',
-    productDetails: ''
-      });
+    productDetails: '',
+    psychTrigger: 'none'
+  });
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<any[]>([]);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -49,7 +51,8 @@ export function EmailGenerator() {
       const emails = await geminiService.generateEmailSwipes({
         ...formData,
         userApiKey,
-        brandVoice: useBrandVoice ? brandVoice : null
+        brandVoice: useBrandVoice ? brandVoice : null,
+        psychTrigger: formData.psychTrigger
       });
       setResults(emails);
     } catch (error: any) {
@@ -107,6 +110,24 @@ export function EmailGenerator() {
               className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all h-32 text-[var(--text-primary)]"
               placeholder="Describe the product, target audience, and main offer..."
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-500" /> Psychological Trigger (Cognitive Bias)
+            </label>
+            <select
+              value={formData.psychTrigger}
+              onChange={(e) => setFormData({ ...formData, psychTrigger: e.target.value })}
+              className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-[var(--text-primary)]"
+            >
+              <option value="none">Standard Neuro-Digital Optimization</option>
+              <option value="loss-aversion">Loss Aversion (Fear of Missing Out)</option>
+              <option value="social-proof">Social Proof (Bandwagon Effect)</option>
+              <option value="authority">Authority (Expert Influence)</option>
+              <option value="dopamine">Dopamine Loop (Curiosity & Reward)</option>
+              <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
+            </select>
           </div>
 
           {brandVoice && (

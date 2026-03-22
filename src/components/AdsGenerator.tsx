@@ -23,6 +23,7 @@ export function AdsGenerator() {
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState('');
   const [details, setDetails] = useState('');
+  const [psychTrigger, setPsychTrigger] = useState('none');
   const [ads, setAds] = useState<AdSet[]>([]);
   const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
   const [mode, setMode] = useState<'full' | 'summary'>('full');
@@ -67,6 +68,7 @@ export function AdsGenerator() {
         mode, 
         style, 
         aspectRatio,
+        psychTrigger,
         brandVoice: useBrandVoice ? brandVoice : null
       });
       setAds(result);
@@ -130,6 +132,24 @@ export function AdsGenerator() {
               value={url}
               onChange={e => setUrl(e.target.value)}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-orange-500" /> Psychological Trigger (Cognitive Bias)
+            </label>
+            <select
+              value={psychTrigger}
+              onChange={e => setPsychTrigger(e.target.value)}
+              className="w-full px-4 py-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] focus:ring-2 focus:ring-orange-500 outline-none transition-all text-[var(--text-primary)]"
+            >
+              <option value="none">Standard Neuro-Digital Optimization</option>
+              <option value="loss-aversion">Loss Aversion (Fear of Missing Out)</option>
+              <option value="social-proof">Social Proof (Bandwagon Effect)</option>
+              <option value="authority">Authority (Expert Influence)</option>
+              <option value="dopamine">Dopamine Loop (Curiosity & Reward)</option>
+              <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
+            </select>
           </div>
 
           <div>

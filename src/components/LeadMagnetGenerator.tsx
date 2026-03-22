@@ -3,7 +3,7 @@ import { trackGeneratorClick } from '../utils/tracking';
 import { geminiService } from '../services/geminiService';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, limit } from 'firebase/firestore';
-import { Loader2, BookOpen, Link as LinkIcon, TypeIcon, Copy, Check, Eye, Download, X, List, Target, Ruler } from 'lucide-react';
+import { Loader2, BookOpen, Link as LinkIcon, TypeIcon, Copy, Check, Eye, Download, X, List, Target, Ruler, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'motion/react';
@@ -17,8 +17,9 @@ export function LeadMagnetGenerator() {
     productDetails: '',
     guideType: 'Ultimate Guide',
     length: 'Medium',
-    monetizationGoal: 'Email Capture'
-      });
+    monetizationGoal: 'Email Capture',
+    psychTrigger: 'none'
+  });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState(false);
@@ -82,7 +83,8 @@ export function LeadMagnetGenerator() {
       const leadMagnet = await geminiService.generateLeadMagnet({
         ...formData,
         userApiKey,
-        brandVoice: useBrandVoice ? brandVoice : null
+        brandVoice: useBrandVoice ? brandVoice : null,
+        psychTrigger: formData.psychTrigger
       });
       setResult(leadMagnet);
     } catch (error: any) {
@@ -157,6 +159,25 @@ export function LeadMagnetGenerator() {
               className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all h-32 text-[var(--text-primary)]"
               placeholder="Describe the topic, target audience, and their main pain points..."
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-500" />
+              Psychological Trigger (Cognitive Bias)
+            </label>
+            <select
+              value={formData.psychTrigger}
+              onChange={(e) => setFormData({ ...formData, psychTrigger: e.target.value })}
+              className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-[var(--text-primary)]"
+            >
+              <option value="none">Standard Neuro-Digital Optimization</option>
+              <option value="loss-aversion">Loss Aversion (Fear of Missing Out)</option>
+              <option value="social-proof">Social Proof (Bandwagon Effect)</option>
+              <option value="authority">Authority (Expert Influence)</option>
+              <option value="dopamine">Dopamine Loop (Curiosity & Reward)</option>
+              <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
+            </select>
           </div>
 
           <div className="grid grid-cols-1 gap-4">
