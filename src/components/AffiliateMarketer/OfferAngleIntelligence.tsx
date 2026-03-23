@@ -8,7 +8,7 @@ import { BrandVoiceToggle } from '../BrandVoiceToggle';
 import { AudienceSelector } from '../AudienceSelector';
 import { AudienceType } from '../../services/geminiService';
 
-export function OfferAngleIntelligence() {
+export function OfferAngleIntelligence({ isAdmin }: { isAdmin?: boolean }) {
   const [formData, setFormData] = useState({
     offerUrl: '',
     productDetails: '',
@@ -130,7 +130,7 @@ export function OfferAngleIntelligence() {
             onChange={(val) => setFormData({ ...formData, audienceType: val })}
           />
 
-          {brandVoice && (
+          {isAdmin && brandVoice && (
             <BrandVoiceToggle
               enabled={useBrandVoice}
               onToggle={setUseBrandVoice}

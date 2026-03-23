@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Key, Shield, Info, Loader2, CheckCircle2, ExternalLink } from 'lucide-react';
+import { X, Key, Shield, Info, Loader2, CheckCircle2, ExternalLink, Brain } from 'lucide-react';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { BrandVoiceToggle } from './BrandVoiceToggle';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [hasPlatformKey, setHasPlatformKey] = useState(false);
+  const [useBrandVoice, setUseBrandVoice] = useState(false);
 
   useEffect(() => {
     if (isOpen && auth.currentUser) {
@@ -38,6 +40,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
       if (userDoc.exists()) {
         setApiKey(userDoc.data().customApiKey || '');
+        setUseBrandVoice(userDoc.data().useBrandVoice || false);
       }
     } catch (error) {
       console.error(error);
@@ -58,7 +61,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setSaving(true);
     try {
       await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-        customApiKey: apiKey
+        customApiKey: apiKey,
+        useBrandVoice: useBrandVoice
       });
       onClose();
     } catch (error) {
@@ -172,6 +176,35 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 <div className="flex items-start gap-2 text-[10px] text-[var(--text-secondary)] leading-tight">
                   <Info className="w-3 h-3 shrink-0 mt-0.5" />
                   <p>This key will be stored securely in your private profile and used for all AI generations if provided.</p>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-[var(--border-color)]"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-[var(--bg-secondary)] px-2 text-[var(--text-secondary)] font-bold tracking-widest">Preferences</span>
+                </div>
+              </div>
+
+              {/* Preferences Section */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-secondary)]">Global Preferences</h3>
+                <div className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl p-5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-cyan-500/10 rounded-lg flex items-center justify-center">
+                      <Brain className="w-4 h-4 text-cyan-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-[var(--text-primary)]">Default Brand Voice</p>
+                      <p className="text-[10px] text-[var(--text-secondary)]">Enable Brand Voice by default in all generators</p>
+                    </div>
+                  </div>
+                  <BrandVoiceToggle 
+                    enabled={useBrandVoice} 
+                    onToggle={setUseBrandVoice} 
+                  />
                 </div>
               </div>
             </div>

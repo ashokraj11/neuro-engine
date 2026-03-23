@@ -10,7 +10,7 @@ import { AudienceSelector } from '../AudienceSelector';
 import { AudienceType } from '../../services/geminiService';
 import { bridgePageTemplates } from '../../utils/htmlTemplates';
 
-export function BridgePageGenerator() {
+export function BridgePageGenerator({ isAdmin }: { isAdmin?: boolean }) {
   const [formData, setFormData] = useState({
     offerUrl: '',
     productDetails: '',
@@ -167,7 +167,7 @@ export function BridgePageGenerator() {
             onChange={(val) => setFormData({ ...formData, audienceType: val })}
           />
 
-          {brandVoice && (
+          {isAdmin && brandVoice && (
             <BrandVoiceToggle
               enabled={useBrandVoice}
               onToggle={setUseBrandVoice}

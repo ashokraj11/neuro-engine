@@ -21,7 +21,7 @@ interface AdSet {
   imageUrl?: string;
 }
 
-export function AdsGenerator() {
+export function AdsGenerator({ isAdmin }: { isAdmin?: boolean }) {
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState('');
   const [details, setDetails] = useState('');
@@ -206,7 +206,7 @@ export function AdsGenerator() {
               </div>
             </div>
 
-            {brandVoice && (
+            {isAdmin && brandVoice && (
               <BrandVoiceToggle
                 enabled={useBrandVoice}
                 onToggle={setUseBrandVoice}

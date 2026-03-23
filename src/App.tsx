@@ -728,21 +728,21 @@ function AppContent() {
                   }} 
                 />
               )}
-              {activeModule === 'blog' && <BlogGenerator />}
-              {activeModule === 'social-media' && <SocialMediaPostGenerator />}
-              {activeModule === 'reels' && <ReelsGenerator />}
-              {activeModule === 'ads' && <AdsGenerator />}
-              {activeModule === 'email' && <EmailGenerator />}
-              {activeModule === 'whatsapp' && <WhatsappGenerator />}
-              {activeModule === 'landing' && <LandingPageGenerator />}
-              {activeModule === 'sales-funnel' && <SalesFunnelGenerator />}
-              {activeModule === 'niche' && <NicheGenerator />}
-              {activeModule === 'lead-magnet' && <LeadMagnetGenerator />}
+              {activeModule === 'blog' && <BlogGenerator isAdmin={isAdmin} />}
+              {activeModule === 'social-media' && <SocialMediaPostGenerator isAdmin={isAdmin} />}
+              {activeModule === 'reels' && <ReelsGenerator isAdmin={isAdmin} />}
+              {activeModule === 'ads' && <AdsGenerator isAdmin={isAdmin} />}
+              {activeModule === 'email' && <EmailGenerator isAdmin={isAdmin} />}
+              {activeModule === 'whatsapp' && <WhatsappGenerator isAdmin={isAdmin} />}
+              {activeModule === 'landing' && <LandingPageGenerator isAdmin={isAdmin} />}
+              {activeModule === 'sales-funnel' && <SalesFunnelGenerator isAdmin={isAdmin} />}
+              {activeModule === 'niche' && <NicheGenerator isAdmin={isAdmin} />}
+              {activeModule === 'lead-magnet' && <LeadMagnetGenerator isAdmin={isAdmin} />}
               {activeModule === 'omnichannel' && <OmnichannelCampaignGenerator />}
-              {activeModule === 'bridge-page' && <BridgePageGenerator />}
-              {activeModule === 'offer-angle' && <OfferAngleIntelligence />}
-              {activeModule === 'ad-policy' && <AdPolicyChecker />}
-              {activeModule === 'competitor-intelligence' && <CompetitorIntelligence />}
+              {activeModule === 'bridge-page' && <BridgePageGenerator isAdmin={isAdmin} />}
+              {activeModule === 'offer-angle' && <OfferAngleIntelligence isAdmin={isAdmin} />}
+              {activeModule === 'ad-policy' && <AdPolicyChecker isAdmin={isAdmin} />}
+              {activeModule === 'competitor-intelligence' && <CompetitorIntelligence isAdmin={isAdmin} />}
               {activeModule === 'brand-voice' && <BrandVoiceManager />}
               {activeModule === 'privacy-policy' && <PrivacyPolicy />}
               {activeModule === 'terms-conditions' && <TermsAndConditions />}

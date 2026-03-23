@@ -11,7 +11,7 @@ import { BrandVoiceToggle } from './BrandVoiceToggle';
 import { AudienceSelector } from './AudienceSelector';
 import { AudienceType } from '../services/geminiService';
 
-export function SalesFunnelGenerator() {
+export function SalesFunnelGenerator({ isAdmin }: { isAdmin?: boolean }) {
   const [formData, setFormData] = useState({
     url: '',
     productDetails: '',
@@ -160,7 +160,7 @@ export function SalesFunnelGenerator() {
             </select>
           </div>
 
-          {brandVoice && (
+          {isAdmin && brandVoice && (
             <BrandVoiceToggle
               enabled={useBrandVoice}
               onToggle={setUseBrandVoice}

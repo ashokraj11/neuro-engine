@@ -20,7 +20,7 @@ type Post = {
   language: string;
 };
 
-export function SocialMediaPostGenerator() {
+export function SocialMediaPostGenerator({ isAdmin }: { isAdmin?: boolean }) {
   const [mode, setMode] = useState<'bulk' | 'manual'>('bulk');
   const [formData, setFormData] = useState({
     sourceType: 'Topic',
@@ -351,7 +351,7 @@ export function SocialMediaPostGenerator() {
               </div>
             </div>
 
-            {brandVoice && (
+            {isAdmin && brandVoice && (
               <BrandVoiceToggle
                 enabled={useBrandVoice}
                 onToggle={setUseBrandVoice}

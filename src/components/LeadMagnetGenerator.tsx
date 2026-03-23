@@ -13,7 +13,7 @@ import { AudienceType } from '../services/geminiService';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 
-export function LeadMagnetGenerator() {
+export function LeadMagnetGenerator({ isAdmin }: { isAdmin?: boolean }) {
   const [formData, setFormData] = useState({
     url: '',
     productDetails: '',
@@ -231,7 +231,7 @@ export function LeadMagnetGenerator() {
             </div>
           </div>
 
-          {brandVoice && (
+          {isAdmin && brandVoice && (
             <BrandVoiceToggle
               enabled={useBrandVoice}
               onToggle={setUseBrandVoice}
