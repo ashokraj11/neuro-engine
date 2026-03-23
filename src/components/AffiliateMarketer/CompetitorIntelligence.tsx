@@ -8,7 +8,7 @@ import { BrandVoiceToggle } from '../BrandVoiceToggle';
 import { AudienceSelector } from '../AudienceSelector';
 import { AudienceType } from '../../services/geminiService';
 
-export function CompetitorIntelligence({ isAdmin }: { isAdmin?: boolean }) {
+export function CompetitorIntelligence() {
   const [formData, setFormData] = useState({
     competitorUrl: '',
     competitorCopy: '',
@@ -110,10 +110,11 @@ export function CompetitorIntelligence({ isAdmin }: { isAdmin?: boolean }) {
             onChange={(val) => setFormData({ ...formData, audienceType: val })}
           />
 
-          {isAdmin && brandVoice && (
+          {auth.currentUser && (
             <BrandVoiceToggle
               enabled={useBrandVoice}
               onToggle={setUseBrandVoice}
+              disabled={!brandVoice}
             />
           )}
 

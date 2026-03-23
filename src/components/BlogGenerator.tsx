@@ -13,7 +13,7 @@ import { AdSense } from './AdSense';
 import { AudienceSelector } from './AudienceSelector';
 import { AudienceType } from '../services/geminiService';
 
-export function BlogGenerator({ isAdmin }: { isAdmin?: boolean }) {
+export function BlogGenerator() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
@@ -239,10 +239,11 @@ export function BlogGenerator({ isAdmin }: { isAdmin?: boolean }) {
             />
           </div>
 
-          {isAdmin && brandVoice && (
+          {auth.currentUser && (
             <BrandVoiceToggle
               enabled={useBrandVoice}
               onToggle={setUseBrandVoice}
+              disabled={!brandVoice}
             />
           )}
 

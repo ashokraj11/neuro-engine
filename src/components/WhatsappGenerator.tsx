@@ -9,7 +9,7 @@ import { AudienceSelector } from './AudienceSelector';
 import { AudienceType } from '../services/geminiService';
 import { motion } from 'motion/react';
 
-export function WhatsappGenerator({ isAdmin }: { isAdmin?: boolean }) {
+export function WhatsappGenerator() {
   const [formData, setFormData] = useState({
     url: '',
     productDetails: '',
@@ -162,10 +162,11 @@ export function WhatsappGenerator({ isAdmin }: { isAdmin?: boolean }) {
             onChange={(val) => setFormData({ ...formData, audienceType: val })}
           />
 
-          {isAdmin && brandVoice && (
+          {auth.currentUser && (
             <BrandVoiceToggle
               enabled={useBrandVoice}
               onToggle={setUseBrandVoice}
+              disabled={!brandVoice}
             />
           )}
 

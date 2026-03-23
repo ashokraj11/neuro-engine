@@ -9,7 +9,7 @@ import { AudienceSelector } from './AudienceSelector';
 import { AudienceType } from '../services/geminiService';
 import { landingPageTemplates } from '../utils/htmlTemplates';
 
-export function LandingPageGenerator({ isAdmin }: { isAdmin?: boolean }) {
+export function LandingPageGenerator() {
   const [formData, setFormData] = useState({
     url: '',
     productDetails: '',
@@ -230,10 +230,11 @@ Final CTA: ${result.finalCTA}
             />
           </div>
 
-          {isAdmin && brandVoice && (
+          {auth.currentUser && (
             <BrandVoiceToggle
               enabled={useBrandVoice}
               onToggle={setUseBrandVoice}
+              disabled={!brandVoice}
             />
           )}
 

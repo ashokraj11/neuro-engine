@@ -6,7 +6,7 @@ import { Loader2, Wand2, Copy, Check, ShieldCheck, FileText } from 'lucide-react
 import { motion } from 'motion/react';
 import { BrandVoiceToggle } from '../BrandVoiceToggle';
 
-export function AdPolicyChecker({ isAdmin }: { isAdmin?: boolean }) {
+export function AdPolicyChecker() {
   const [formData, setFormData] = useState({
     adCopy: '',
     landingPageUrl: ''
@@ -111,10 +111,11 @@ export function AdPolicyChecker({ isAdmin }: { isAdmin?: boolean }) {
             />
           </div>
 
-          {isAdmin && brandVoice && (
+          {auth.currentUser && (
             <BrandVoiceToggle
               enabled={useBrandVoice}
               onToggle={setUseBrandVoice}
+              disabled={!brandVoice}
             />
           )}
 

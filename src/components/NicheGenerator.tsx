@@ -11,7 +11,7 @@ import { BrandVoiceToggle } from './BrandVoiceToggle';
 import { AudienceSelector } from './AudienceSelector';
 import { AudienceType } from '../services/geminiService';
 
-export function NicheGenerator({ isAdmin }: { isAdmin?: boolean }) {
+export function NicheGenerator() {
   const [formData, setFormData] = useState({
     url: '',
     productDetails: '',
@@ -140,10 +140,11 @@ export function NicheGenerator({ isAdmin }: { isAdmin?: boolean }) {
             onChange={(val) => setFormData({ ...formData, audienceType: val })}
           />
 
-          {isAdmin && brandVoice && (
+          {auth.currentUser && (
             <BrandVoiceToggle
               enabled={useBrandVoice}
               onToggle={setUseBrandVoice}
+              disabled={!brandVoice}
             />
           )}
 

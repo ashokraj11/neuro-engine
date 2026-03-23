@@ -20,7 +20,7 @@ interface Scene {
   audioUrl?: string;
 }
 
-export function ReelsGenerator({ isAdmin }: { isAdmin?: boolean }) {
+export function ReelsGenerator() {
   const [loading, setLoading] = useState(false);
   const [compiling, setCompiling] = useState(false);
   const [url, setUrl] = useState('');
@@ -243,10 +243,11 @@ export function ReelsGenerator({ isAdmin }: { isAdmin?: boolean }) {
               />
             </div>
 
-            {isAdmin && brandVoice && (
+            {auth.currentUser && (
               <BrandVoiceToggle
                 enabled={useBrandVoice}
                 onToggle={setUseBrandVoice}
+                disabled={!brandVoice}
               />
             )}
 
