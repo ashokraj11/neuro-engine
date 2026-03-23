@@ -8,6 +8,8 @@ import { Loader2, Video, Play, Music, Type, Image as ImageIcon, Download, Globe,
 import { motion, AnimatePresence } from 'motion/react';
 import { downloadImage } from '../lib/utils';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
+import { AudienceSelector } from './AudienceSelector';
+import { AudienceType } from '../services/geminiService';
 
 interface Scene {
   scene: string;
@@ -24,6 +26,7 @@ export function ReelsGenerator() {
   const [url, setUrl] = useState('');
   const [details, setDetails] = useState('');
   const [psychTrigger, setPsychTrigger] = useState('none');
+  const [audienceType, setAudienceType] = useState<AudienceType>('none');
   const [sceneCount, setSceneCount] = useState(5);
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [currentStep, setCurrentStep] = useState<'idle' | 'scripting' | 'visualizing' | 'voicing' | 'ready'>('idle');
@@ -97,6 +100,7 @@ export function ReelsGenerator() {
         userApiKey, 
         sceneCount,
         psychTrigger,
+        audienceType,
         brandVoice: useBrandVoice ? brandVoice || undefined : undefined
       });
       setScenes(sceneData);
@@ -207,6 +211,11 @@ export function ReelsGenerator() {
                 <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
               </select>
             </div>
+
+            <AudienceSelector
+              value={audienceType}
+              onChange={setAudienceType}
+            />
 
             <div>
               <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">

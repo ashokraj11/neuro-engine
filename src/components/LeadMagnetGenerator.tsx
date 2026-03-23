@@ -8,6 +8,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'motion/react';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
+import { AudienceSelector } from './AudienceSelector';
+import { AudienceType } from '../services/geminiService';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 
@@ -18,7 +20,8 @@ export function LeadMagnetGenerator() {
     guideType: 'Ultimate Guide',
     length: 'Medium',
     monetizationGoal: 'Email Capture',
-    psychTrigger: 'none'
+    psychTrigger: 'none',
+    audienceType: 'none' as AudienceType
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -84,7 +87,8 @@ export function LeadMagnetGenerator() {
         ...formData,
         userApiKey,
         brandVoice: useBrandVoice ? brandVoice : null,
-        psychTrigger: formData.psychTrigger
+        psychTrigger: formData.psychTrigger,
+        audienceType: formData.audienceType
       });
       setResult(leadMagnet);
     } catch (error: any) {
@@ -179,6 +183,11 @@ export function LeadMagnetGenerator() {
               <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
             </select>
           </div>
+
+          <AudienceSelector
+            value={formData.audienceType}
+            onChange={(val) => setFormData({ ...formData, audienceType: val })}
+          />
 
           <div className="grid grid-cols-1 gap-4">
             <div>

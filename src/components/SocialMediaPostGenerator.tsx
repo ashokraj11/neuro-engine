@@ -6,6 +6,8 @@ import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/fires
 import { Loader2, Share2, Type, Link as LinkIcon, Hash, Image as ImageIcon, Layout, Globe, Sparkles, Plus, Trash2, Download, Copy, Check, List, Target, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
+import { AudienceSelector } from './AudienceSelector';
+import { AudienceType } from '../services/geminiService';
 
 type Post = {
   id?: string;
@@ -26,6 +28,7 @@ export function SocialMediaPostGenerator() {
     url: '',
     postAngle: 'Emotional Resonance',
     psychTrigger: 'none',
+    audienceType: 'none' as AudienceType,
     topicCount: 5,
     dimension: '4:5',
     language: 'English',
@@ -83,6 +86,7 @@ export function SocialMediaPostGenerator() {
         niche: 'Motivation',
         postAngle: formData.postAngle,
         psychTrigger: formData.psychTrigger,
+        audienceType: formData.audienceType,
         context: formData.context || formData.url,
         count: formData.topicCount,
         brandVoice: useBrandVoice ? brandVoice || undefined : undefined,
@@ -122,6 +126,7 @@ export function SocialMediaPostGenerator() {
           language: formData.language,
           postAngle: formData.postAngle,
           psychTrigger: formData.psychTrigger,
+          audienceType: formData.audienceType,
           brandVoice: useBrandVoice ? brandVoice || undefined : undefined,
           userApiKey
         });
@@ -212,6 +217,12 @@ export function SocialMediaPostGenerator() {
                     >
                       {postAngles.map(a => <option key={a} value={a}>{a}</option>)}
                     </select>
+                  </div>
+                  <div className="col-span-2">
+                    <AudienceSelector
+                      value={formData.audienceType}
+                      onChange={(val) => setFormData({ ...formData, audienceType: val })}
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">

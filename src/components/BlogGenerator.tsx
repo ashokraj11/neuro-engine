@@ -10,6 +10,8 @@ import { Loader2, FileText, Globe, Link as LinkIcon, Hash, Type as TypeIcon, Ali
 import { downloadImage } from '../lib/utils';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
 import { AdSense } from './AdSense';
+import { AudienceSelector } from './AudienceSelector';
+import { AudienceType } from '../services/geminiService';
 
 export function BlogGenerator() {
   const [loading, setLoading] = useState(false);
@@ -24,6 +26,7 @@ export function BlogGenerator() {
     secondaryKeywords: '',
     blogType: 'Review',
     psychTrigger: 'none',
+    audienceType: 'none' as AudienceType,
     wordCount: 1000
       });
   const [brandVoice, setBrandVoice] = useState<{ tone: string, examples: string } | null>(null);
@@ -62,7 +65,8 @@ export function BlogGenerator() {
         ...formData,
         secondaryKeywords: formData.secondaryKeywords.split(',').map(k => k.trim()),
         brandVoice: useBrandVoice ? brandVoice || undefined : undefined,
-        userApiKey
+        userApiKey,
+        audienceType: formData.audienceType
       });
       
       let markdownText = blogData.markdown || "Failed to generate blog content.";
@@ -205,6 +209,11 @@ export function BlogGenerator() {
               <option value="scarcity">Scarcity (Limited Availability)</option>
             </select>
           </div>
+
+          <AudienceSelector
+            value={formData.audienceType}
+            onChange={(val) => setFormData({ ...formData, audienceType: val })}
+          />
 
           <div>
             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Secondary Keywords (comma separated)</label>

@@ -6,6 +6,8 @@ import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/fires
 import { Loader2, Wand2, Copy, Check, FileText, Download, Layout, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { BrandVoiceToggle } from '../BrandVoiceToggle';
+import { AudienceSelector } from '../AudienceSelector';
+import { AudienceType } from '../../services/geminiService';
 import { bridgePageTemplates } from '../../utils/htmlTemplates';
 
 export function BridgePageGenerator() {
@@ -13,7 +15,8 @@ export function BridgePageGenerator() {
     offerUrl: '',
     productDetails: '',
     targetAudience: '',
-    psychTrigger: 'none'
+    psychTrigger: 'none',
+    audienceType: 'none' as AudienceType
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -56,6 +59,7 @@ export function BridgePageGenerator() {
         brandVoice: useBrandVoice ? brandVoice || undefined : undefined,
         framework,
         psychTrigger: formData.psychTrigger,
+        audienceType: formData.audienceType,
         userApiKey
       });
       setResult(data);
@@ -157,6 +161,11 @@ export function BridgePageGenerator() {
               placeholder="e.g., Busy moms looking to save time"
             />
           </div>
+
+          <AudienceSelector
+            value={formData.audienceType}
+            onChange={(val) => setFormData({ ...formData, audienceType: val })}
+          />
 
           {brandVoice && (
             <BrandVoiceToggle

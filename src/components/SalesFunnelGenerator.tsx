@@ -8,13 +8,16 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion } from 'motion/react';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
+import { AudienceSelector } from './AudienceSelector';
+import { AudienceType } from '../services/geminiService';
 
 export function SalesFunnelGenerator() {
   const [formData, setFormData] = useState({
     url: '',
     productDetails: '',
     funnelType: 'Lead Generation',
-    psychTrigger: 'none'
+    psychTrigger: 'none',
+    audienceType: 'none' as AudienceType
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -68,7 +71,8 @@ export function SalesFunnelGenerator() {
         ...formData,
         userApiKey,
         brandVoice: useBrandVoice ? brandVoice : null,
-        psychTrigger: formData.psychTrigger
+        psychTrigger: formData.psychTrigger,
+        audienceType: formData.audienceType
       });
       setResult(funnel);
     } catch (error: any) {
@@ -139,6 +143,11 @@ export function SalesFunnelGenerator() {
               <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
             </select>
           </div>
+
+          <AudienceSelector
+            value={formData.audienceType}
+            onChange={(val) => setFormData({ ...formData, audienceType: val })}
+          />
 
           <div>
             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Funnel Type</label>

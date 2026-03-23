@@ -36,6 +36,31 @@ export type BrandVoice = {
   psychologicalTriggers?: string;
 };
 
+export type AudienceType = 
+  | 'cold-unaware' | 'cold-problem' | 'cold-solution' | 'cold-content'
+  | 'warm-engaged' | 'warm-lead' | 'warm-consideration' | 'warm-community'
+  | 'hot-intent' | 'hot-abandoner' | 'hot-objection' | 'hot-repeat'
+  | 'none';
+
+const getAudiencePrompt = (audienceType: AudienceType) => {
+  const prompts: Record<string, string> = {
+    'cold-unaware': "TARGET AUDIENCE: Completely Unaware (Cold). They don't even know they have a problem. Focus on pattern interrupts and highlighting a hidden pain point or a massive opportunity they are missing.",
+    'cold-problem': "TARGET AUDIENCE: Problem-Aware (Cold). They know they have a problem but don't know the solution. Focus on agitating the problem and introducing your solution as the unique mechanism to solve it.",
+    'cold-solution': "TARGET AUDIENCE: Solution-Aware (Cold). They know solutions exist but don't know YOU. Focus on differentiation and why your specific approach is superior to competitors.",
+    'cold-content': "TARGET AUDIENCE: Content-Aware (Cold). They've seen your content but don't trust you yet. Focus on building authority, providing massive value, and establishing credibility.",
+    'warm-engaged': "TARGET AUDIENCE: Engaged (Warm). They like/comment/share. Focus on deepening the relationship, asking for micro-commitments, and moving them towards a lead magnet.",
+    'warm-lead': "TARGET AUDIENCE: Lead (Warm). They are on your list. Focus on nurturing, social proof, and presenting your core offer as the logical next step.",
+    'warm-consideration': "TARGET AUDIENCE: Consideration (Warm). They are thinking about buying. Focus on overcoming common doubts, showing case studies, and creating a sense of 'safe' transition.",
+    'warm-community': "TARGET AUDIENCE: Community (Warm). They trust you deeply. Focus on exclusive insights, behind-the-scenes content, and direct calls to action for your programs.",
+    'hot-intent': "TARGET AUDIENCE: Intent-Based (Hot). Strong interest in buying. Focus on direct response, clear benefits, and a strong, urgent call to action.",
+    'hot-abandoner': "TARGET AUDIENCE: Cart Abandoners (Hot). Almost bought but didn't. Focus on 'What happened?', addressing technical friction, and offering a limited-time incentive or reassurance.",
+    'hot-objection': "TARGET AUDIENCE: Objection-Based (Hot). Interested but has doubts (price, time, fit). Focus on risk reversal (guarantees), FAQ-style objection handling, and ROI calculations.",
+    'hot-repeat': "TARGET AUDIENCE: Repeat Buyers (Hot). Already bought. Focus on upsells, cross-sells, loyalty rewards, and advanced strategies for their next level.",
+    'none': ""
+  };
+  return prompts[audienceType] || "";
+};
+
 const getAvatarPrompt = (brandVoice?: BrandVoice) => {
   if (!brandVoice || !brandVoice.name) return '';
   return `
@@ -107,6 +132,7 @@ export const geminiService = {
     wordCount: number;
     brandVoice?: BrandVoice;
     psychTrigger?: string;
+    audienceType?: AudienceType;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -116,6 +142,8 @@ export const geminiService = {
       You are a human-style blog writer, an elite SEO expert, and a neuromarketing strategist. Your goal is to produce blog articles that feel natural, conversational, and engaging for human readers while remaining clear, truthful, and useful.
       
       Task: Generate a high-converting marketing blog article.
+      
+      ${getAudiencePrompt(params.audienceType || 'none')}
       
       ${getTriggerInstruction(params.psychTrigger)}
       
@@ -234,6 +262,7 @@ export const geminiService = {
     funnelType: string;
     brandVoice?: BrandVoice;
     psychTrigger?: string;
+    audienceType?: AudienceType;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -244,6 +273,8 @@ export const geminiService = {
       
       TASK
       Design a high-converting ${params.funnelType} sales funnel.
+      
+      ${getAudiencePrompt(params.audienceType || 'none')}
       
       ${getTriggerInstruction(params.psychTrigger)}
       
@@ -315,6 +346,7 @@ export const geminiService = {
     brandVoice?: BrandVoice;
     framework?: string;
     psychTrigger?: string;
+    audienceType?: AudienceType;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -324,6 +356,8 @@ export const geminiService = {
       
       TASK
       Generate a high-converting "Bridge Page" (pre-sell page) for an affiliate offer using the ${params.framework || 'PAS (Problem-Agitate-Solve)'} framework.
+      
+      ${getAudiencePrompt(params.audienceType || 'none')}
       
       ${getTriggerInstruction(params.psychTrigger)}
       
@@ -386,6 +420,7 @@ export const geminiService = {
     productDetails?: string;
     brandVoice?: BrandVoice;
     psychTrigger?: string;
+    audienceType?: AudienceType;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -395,6 +430,8 @@ export const geminiService = {
       
       TASK
       Analyze the provided affiliate offer and generate 10 distinct, high-converting "Angles" to promote it.
+      
+      ${getAudiencePrompt(params.audienceType || 'none')}
       
       ${getTriggerInstruction(params.psychTrigger)}
       
@@ -527,7 +564,7 @@ export const geminiService = {
     url?: string;
     productDetails?: string;
     brandVoice?: BrandVoice;
-    
+    audienceType?: AudienceType;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -539,6 +576,8 @@ export const geminiService = {
       Analyze the provided product details: "${params.productDetails || 'Not provided'}" and the sales page URL: "${params.url || 'Not provided'}".
       
       Suggest a Niche, a Sub-niche, and generate a Full Detailed Buyer Persona.
+
+      ${getAudiencePrompt(params.audienceType || 'none')}
 
       ${getAvatarPrompt(params.brandVoice)}
 
@@ -605,6 +644,7 @@ export const geminiService = {
     aspectRatio: '1:1' | '9:16' | '16:9';
     brandVoice?: BrandVoice;
     psychTrigger?: string;
+    audienceType?: AudienceType;
   }) {
     const ai = getAI(params.userApiKey);
     const prompt = `
@@ -612,6 +652,8 @@ export const geminiService = {
       Analyze the product: ${params.productDetails} and the provided Sales Page URL: ${params.url}
       
       Task: Generate ${params.mode === 'full' ? '5' : '2'} high-converting Meta Ad creatives using the "Meta Andromeda" strategy.
+      
+      ${getAudiencePrompt(params.audienceType || 'none')}
       
       ${getTriggerInstruction(params.psychTrigger)}
       
@@ -676,7 +718,7 @@ export const geminiService = {
     return JSON.parse(response.text || "[]");
   },
 
-  async generateLandingPage(params: { url: string; productDetails: string; userApiKey?: string; brandVoice?: BrandVoice; framework?: string; psychTrigger?: string; }) {
+  async generateLandingPage(params: { url: string; productDetails: string; userApiKey?: string; brandVoice?: BrandVoice; framework?: string; psychTrigger?: string; audienceType?: AudienceType; }) {
     const ai = getAI(params.userApiKey);
     const prompt = `
       ROLE
@@ -684,6 +726,8 @@ export const geminiService = {
       
       TASK
       Create a high-converting landing page structure using the ${params.framework || 'AIDA (Attention-Interest-Desire-Action)'} framework.
+
+      ${getAudiencePrompt(params.audienceType || 'none')}
 
       ${getTriggerInstruction(params.psychTrigger)}
 
@@ -781,13 +825,15 @@ export const geminiService = {
 
     return JSON.parse(response.text || "{}");
   },
-  async generateEmailSwipes(params: { url: string; productDetails: string; userApiKey?: string; brandVoice?: BrandVoice; psychTrigger?: string; }) {
+  async generateEmailSwipes(params: { url: string; productDetails: string; userApiKey?: string; brandVoice?: BrandVoice; psychTrigger?: string; audienceType?: AudienceType; }) {
     const ai = getAI(params.userApiKey);
     const prompt = `
       You are an elite neuro-copywriter specializing in high-converting email sequences.
       Create a 10-part email swipe sequence based on the following:
       - Sales Page URL: ${params.url}
       - Product Details: ${params.productDetails}
+      
+      ${getAudiencePrompt(params.audienceType || 'none')}
       
       ${getTriggerInstruction(params.psychTrigger)}
       
@@ -855,13 +901,23 @@ export const geminiService = {
     return JSON.parse(response.text || "{}");
   },
 
-  async generateReelScript(params: { url: string; productDetails: string; userApiKey?: string; sceneCount?: number; brandVoice?: BrandVoice; psychTrigger?: string; }) {
+  async generateReelScript(params: {
+    url: string;
+    productDetails: string;
+    userApiKey?: string;
+    sceneCount?: number;
+    brandVoice?: BrandVoice;
+    psychTrigger?: string;
+    audienceType?: AudienceType;
+  }) {
     const ai = getAI(params.userApiKey);
     const count = params.sceneCount || 5;
     const prompt = `
       ROLE
       You are a short-form video viral strategist and master of faceless video content.
       Analyze the product: ${params.productDetails} and the provided Sales Page URL: ${params.url}
+      
+      ${getAudiencePrompt(params.audienceType || 'none')}
       
       ${getTriggerInstruction(params.psychTrigger)}
       
@@ -941,13 +997,15 @@ export const geminiService = {
     return null;
   },
 
-  async generateWhatsappSwipes(params: { url: string; productDetails: string; userApiKey?: string; brandVoice?: BrandVoice; psychTrigger?: string; }) {
+  async generateWhatsappSwipes(params: { url: string; productDetails: string; userApiKey?: string; brandVoice?: BrandVoice; psychTrigger?: string; audienceType?: AudienceType; }) {
     const ai = getAI(params.userApiKey);
     const prompt = `
       You are an elite neuro-copywriter specializing in high-converting WhatsApp marketing.
       Create a 10-part WhatsApp swipe sequence based on the following:
       - Sales Page URL: ${params.url}
       - Product Details: ${params.productDetails}
+
+      ${getAudiencePrompt(params.audienceType || 'none')}
 
       ${getTriggerInstruction(params.psychTrigger)}
 
@@ -1033,6 +1091,7 @@ export const geminiService = {
     monetizationGoal: string;
     brandVoice?: BrandVoice;
     psychTrigger?: string;
+    audienceType?: AudienceType;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -1047,6 +1106,8 @@ export const geminiService = {
       - Guide Type: ${params.guideType}
       - Length Target: ${params.length} (Short: ~3k words, Medium: ~7k words, Long: ~15k words)
       - Monetization Goal: ${params.monetizationGoal}
+
+      ${getAudiencePrompt(params.audienceType || 'none')}
 
       ${getTriggerInstruction(params.psychTrigger)}
 
@@ -1137,7 +1198,7 @@ export const geminiService = {
     competitorUrl: string;
     competitorCopy: string;
     brandVoice?: BrandVoice;
-    
+    audienceType?: AudienceType;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -1149,6 +1210,8 @@ export const geminiService = {
       Analyze the following competitor information:
       - Competitor URL: ${params.competitorUrl || "Not provided"}
       - Competitor Copy/Text: ${params.competitorCopy || "Not provided"}
+
+      ${getAudiencePrompt(params.audienceType || 'none')}
 
       ${getAvatarPrompt(params.brandVoice)}
 
@@ -1228,6 +1291,7 @@ export const geminiService = {
     count: number;
     brandVoice?: BrandVoice;
     psychTrigger?: string;
+    audienceType?: AudienceType;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -1240,6 +1304,8 @@ export const geminiService = {
       - Niche: ${params.niche}
       - Post Angle (Neuromarketing): ${params.postAngle}
       - Context: ${params.context || "None provided"}
+
+      ${getAudiencePrompt(params.audienceType || 'none')}
 
       ${getTriggerInstruction(params.psychTrigger || 'none')}
 
@@ -1288,6 +1354,7 @@ export const geminiService = {
     postAngle: string;
     brandVoice?: BrandVoice;
     psychTrigger?: string;
+    audienceType?: AudienceType;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -1301,6 +1368,8 @@ export const geminiService = {
       Generate ready-to-post Instagram content for the topic: "${params.topic}".
       ${params.manualScript ? `Base the content on this script: "${params.manualScript}"` : ""}
       ${params.context ? `Additional context: "${params.context}"` : ""}
+
+      ${getAudiencePrompt(params.audienceType || 'none')}
 
       ${getTriggerInstruction(params.psychTrigger)}
 
@@ -1396,6 +1465,7 @@ export const geminiService = {
   async generateOmnichannelCampaign(params: {
     brandVoice: BrandVoice;
     productDetails?: string;
+    audienceType?: AudienceType;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -1415,6 +1485,8 @@ export const geminiService = {
       - Brand Examples: ${params.brandVoice.examples}
       - Vocabulary: ${params.brandVoice.vocabulary}
       - Psychological Triggers: ${params.brandVoice.psychologicalTriggers}
+
+      ${getAudiencePrompt(params.audienceType || 'none')}
 
       🧠 CORE OBJECTIVE
       Generate a FULL CAMPAIGN FUNNEL with perfect Message Match Consistency.

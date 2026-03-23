@@ -5,12 +5,15 @@ import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/fires
 import { Loader2, Wand2, Copy, Check, Crosshair, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { BrandVoiceToggle } from '../BrandVoiceToggle';
+import { AudienceSelector } from '../AudienceSelector';
+import { AudienceType } from '../../services/geminiService';
 
 export function CompetitorIntelligence() {
   const [formData, setFormData] = useState({
     competitorUrl: '',
-    competitorCopy: ''
-      });
+    competitorCopy: '',
+    audienceType: 'none' as AudienceType
+  });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState<string | null>(null);
@@ -49,6 +52,7 @@ export function CompetitorIntelligence() {
       const data = await geminiService.generateCompetitorCounterStrategy({
         ...formData,
         brandVoice: useBrandVoice ? brandVoice || undefined : undefined,
+        audienceType: formData.audienceType,
         userApiKey
       });
       setResult(data);
@@ -100,6 +104,11 @@ export function CompetitorIntelligence() {
               rows={6}
             />
           </div>
+
+          <AudienceSelector
+            value={formData.audienceType}
+            onChange={(val) => setFormData({ ...formData, audienceType: val })}
+          />
 
           {brandVoice && (
             <BrandVoiceToggle

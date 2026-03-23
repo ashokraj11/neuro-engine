@@ -7,10 +7,13 @@ import { Loader2, Wand2, Copy, Check, Layers } from 'lucide-react';
 import { motion } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { AudienceSelector } from './AudienceSelector';
+import { AudienceType } from '../services/geminiService';
 
 export function OmnichannelCampaignGenerator() {
   const [formData, setFormData] = useState({
-    productDetails: ''
+    productDetails: '',
+    audienceType: 'none' as AudienceType
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -41,6 +44,7 @@ export function OmnichannelCampaignGenerator() {
         brandVoice: brandVoice as any,
         productDetails: formData.productDetails,
         userApiKey,
+        audienceType: formData.audienceType
       });
       setResult(data);
     } catch (error: any) {
@@ -79,6 +83,13 @@ export function OmnichannelCampaignGenerator() {
             onChange={(e) => setFormData({ ...formData, productDetails: e.target.value })}
             className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all h-32 text-[var(--text-primary)] text-sm"
             placeholder="Describe the product, main offer, and any specific angles you want to emphasize..."
+          />
+        </div>
+
+        <div className="max-w-xl mx-auto mb-8 text-left">
+          <AudienceSelector
+            value={formData.audienceType}
+            onChange={(val) => setFormData({ ...formData, audienceType: val })}
           />
         </div>
         

@@ -7,6 +7,8 @@ import { Loader2, Megaphone, Globe, AlignLeft, Copy, Check, Sparkles, Image as I
 import { motion, AnimatePresence } from 'motion/react';
 import { downloadImage } from '../lib/utils';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
+import { AudienceSelector } from './AudienceSelector';
+import { AudienceType } from '../services/geminiService';
 
 interface AdSet {
   angle: string;
@@ -24,6 +26,7 @@ export function AdsGenerator() {
   const [url, setUrl] = useState('');
   const [details, setDetails] = useState('');
   const [psychTrigger, setPsychTrigger] = useState('none');
+  const [audienceType, setAudienceType] = useState<AudienceType>('none');
   const [ads, setAds] = useState<AdSet[]>([]);
   const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
   const [mode, setMode] = useState<'full' | 'summary'>('full');
@@ -69,6 +72,7 @@ export function AdsGenerator() {
         style, 
         aspectRatio,
         psychTrigger,
+        audienceType,
         brandVoice: useBrandVoice ? brandVoice : null
       });
       setAds(result);
@@ -151,6 +155,11 @@ export function AdsGenerator() {
               <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
             </select>
           </div>
+
+          <AudienceSelector
+            value={audienceType}
+            onChange={setAudienceType}
+          />
 
           <div>
             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">

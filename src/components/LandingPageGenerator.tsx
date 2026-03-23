@@ -5,13 +5,16 @@ import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, limit } from 'firebase/firestore';
 import { Loader2, LayoutTemplate, Link as LinkIcon, TypeIcon, Copy, Check, Eye, Download, X, Layout, Sparkles } from 'lucide-react';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
+import { AudienceSelector } from './AudienceSelector';
+import { AudienceType } from '../services/geminiService';
 import { landingPageTemplates } from '../utils/htmlTemplates';
 
 export function LandingPageGenerator() {
   const [formData, setFormData] = useState({
     url: '',
     productDetails: '',
-    psychTrigger: 'none'
+    psychTrigger: 'none',
+    audienceType: 'none' as AudienceType
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -95,7 +98,8 @@ export function LandingPageGenerator() {
         userApiKey,
         brandVoice: useBrandVoice ? brandVoice : null,
         framework,
-        psychTrigger: formData.psychTrigger
+        psychTrigger: formData.psychTrigger,
+        audienceType: formData.audienceType
       });
       setResult(landingPage);
       setCritique(null);
@@ -251,6 +255,11 @@ Final CTA: ${result.finalCTA}
               <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
             </select>
           </div>
+
+          <AudienceSelector
+            value={formData.audienceType}
+            onChange={(val) => setFormData({ ...formData, audienceType: val })}
+          />
 
           <div>
             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1 flex items-center gap-2">

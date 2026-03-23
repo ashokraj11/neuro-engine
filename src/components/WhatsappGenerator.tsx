@@ -5,13 +5,16 @@ import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, limit } from 'firebase/firestore';
 import { Loader2, MessageSquare, Link as LinkIcon, Type as TypeIcon, Copy, Check, ImageIcon, Sparkles } from 'lucide-react';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
+import { AudienceSelector } from './AudienceSelector';
+import { AudienceType } from '../services/geminiService';
 import { motion } from 'motion/react';
 
 export function WhatsappGenerator() {
   const [formData, setFormData] = useState({
     url: '',
     productDetails: '',
-    psychTrigger: 'none'
+    psychTrigger: 'none',
+    audienceType: 'none' as AudienceType
   });
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<any[]>([]);
@@ -54,7 +57,8 @@ export function WhatsappGenerator() {
         ...formData,
         userApiKey,
         brandVoice: useBrandVoice ? brandVoice : null,
-        psychTrigger: formData.psychTrigger
+        psychTrigger: formData.psychTrigger,
+        audienceType: formData.audienceType
       });
       setResults(swipes);
     } catch (error: any) {
@@ -152,6 +156,11 @@ export function WhatsappGenerator() {
               <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
             </select>
           </div>
+
+          <AudienceSelector
+            value={formData.audienceType}
+            onChange={(val) => setFormData({ ...formData, audienceType: val })}
+          />
 
           {brandVoice && (
             <BrandVoiceToggle

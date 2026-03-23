@@ -5,12 +5,15 @@ import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/fires
 import { Loader2, Wand2, Copy, Check, Lightbulb, FileText, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { BrandVoiceToggle } from '../BrandVoiceToggle';
+import { AudienceSelector } from '../AudienceSelector';
+import { AudienceType } from '../../services/geminiService';
 
 export function OfferAngleIntelligence() {
   const [formData, setFormData] = useState({
     offerUrl: '',
     productDetails: '',
-    psychTrigger: 'none'
+    psychTrigger: 'none',
+    audienceType: 'none' as AudienceType
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -51,6 +54,7 @@ export function OfferAngleIntelligence() {
         ...formData,
         brandVoice: useBrandVoice ? brandVoice || undefined : undefined,
         psychTrigger: formData.psychTrigger,
+        audienceType: formData.audienceType,
         userApiKey
       });
       setResult(data);
@@ -120,6 +124,11 @@ export function OfferAngleIntelligence() {
               <option value="scarcity">Scarcity (Urgency & Exclusive Access)</option>
             </select>
           </div>
+
+          <AudienceSelector
+            value={formData.audienceType}
+            onChange={(val) => setFormData({ ...formData, audienceType: val })}
+          />
 
           {brandVoice && (
             <BrandVoiceToggle
