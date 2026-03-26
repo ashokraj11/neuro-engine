@@ -283,13 +283,23 @@ function AppContent() {
         
         // Google Search Console Verification
         if (data.googleVerification) {
+          let verificationCode = data.googleVerification;
+          
+          // If user pasted the whole tag, extract the content
+          if (verificationCode.includes('<meta') && verificationCode.includes('content=')) {
+            const match = verificationCode.match(/content=["']([^"']+)["']/);
+            if (match && match[1]) {
+              verificationCode = match[1];
+            }
+          }
+
           let meta = document.querySelector('meta[name="google-site-verification"]');
           if (!meta) {
             meta = document.createElement('meta');
             meta.setAttribute('name', 'google-site-verification');
             document.head.appendChild(meta);
           }
-          meta.setAttribute('content', data.googleVerification);
+          meta.setAttribute('content', verificationCode);
         }
 
         // Google Analytics

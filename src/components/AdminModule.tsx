@@ -2239,10 +2239,10 @@ function AdminSEOModule() {
                 value={seoConfig.googleVerification || ''}
                 onChange={(e) => setSeoConfig({ ...seoConfig, googleVerification: e.target.value })}
                 className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none text-sm"
-                placeholder="e.g. YOUR_VERIFICATION_CODE_HERE"
+                placeholder="e.g. ABC123xyz..."
               />
               <p className="mt-2 text-[10px] text-[var(--text-secondary)]">
-                Copy the 'content' value from the meta tag provided by Google Search Console.
+                Enter the verification code or paste the entire &lt;meta&gt; tag. The system will automatically extract the code.
               </p>
             </div>
           </div>
