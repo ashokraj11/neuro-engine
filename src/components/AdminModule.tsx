@@ -99,6 +99,8 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
     const q = query(collection(db, 'messages'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setUnreadMessages(snapshot.docs.filter(doc => !doc.data().read).length);
+    }, (error) => {
+      console.error("Error fetching unread messages count:", error);
     });
     return () => unsubscribe();
   }, []);
@@ -2166,6 +2168,9 @@ function AdminSEOModule() {
       if (doc.exists()) {
         setSeoConfig(doc.data() as SEOConfig);
       }
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching SEO config in Admin:", error);
       setLoading(false);
     });
     return () => unsubscribe();

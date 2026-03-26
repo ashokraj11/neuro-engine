@@ -92,7 +92,7 @@ service cloud.firestore {
     function isMasterAdmin() {
       return isAuthenticated() && 
         (
-          (request.auth.token.email == "mail2ashokrajj@gmail.com") ||
+          (request.auth.token.email == "mail2ashokrajj@gmail.com" && request.auth.token.email_verified == true) ||
           (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'master')
         );
@@ -335,7 +335,7 @@ service cloud.firestore {
       allow write: if isAdmin() && isValidAdConfig(request.resource.data);
     }
 
-    match /seo_config/global {
+    match /seo_config/{configId} {
       allow read: if true;
       allow write: if isAdmin();
     }

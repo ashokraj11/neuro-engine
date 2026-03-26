@@ -22,6 +22,9 @@ export function AdminMessagesModule() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setMessages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Message)));
       setLoading(false);
+    }, (error) => {
+      console.error("Error fetching messages:", error);
+      setLoading(false);
     });
     return () => unsubscribe();
   }, []);

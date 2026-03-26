@@ -314,6 +314,8 @@ function AppContent() {
           }
         }
       }
+    }, (error) => {
+      console.error("Error fetching SEO config:", error);
     });
     return () => unsubscribe();
   }, []);
