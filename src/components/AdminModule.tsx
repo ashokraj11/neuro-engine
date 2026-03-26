@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, getDocs, setDoc } from 'firebase/firestore';
-import { Plus, Pencil, Trash2, Youtube, Link as LinkIcon, Image as ImageIcon, Save, X, Loader2, Upload, CheckCircle2, Users, User as UserIcon, Wrench, FileDown, Copy, ShieldCheck, HelpCircle, Eye, EyeOff, Search, MessageSquare } from 'lucide-react';
+import { Plus, Pencil, Trash2, Youtube, Link as LinkIcon, Image as ImageIcon, Save, X, Loader2, Upload, CheckCircle2, Users, User as UserIcon, Wrench, FileDown, Copy, ShieldCheck, HelpCircle, Eye, EyeOff, Search, MessageSquare, Sparkles } from 'lucide-react';
 import { AdminMessagesModule } from './AdminMessagesModule';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
@@ -73,6 +73,13 @@ interface AdConfig {
   adCode?: string;
 }
 
+interface SEOConfig {
+  googleVerification?: string;
+  googleAnalyticsId?: string;
+  robotsTxt?: string;
+  sitemapUrl?: string;
+}
+
 export function AdminModule({ isMaster }: { isMaster: boolean }) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -85,7 +92,7 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
 
   const [showUserList, setShowUserList] = useState(false);
   const [showEngagement, setShowEngagement] = useState(false);
-  const [activeAdminTab, setActiveAdminTab] = useState<'courses' | 'users' | 'tools' | 'templates' | 'blog' | 'system' | 'modules' | 'ads' | 'messages'>('courses');
+  const [activeAdminTab, setActiveAdminTab] = useState<'courses' | 'users' | 'tools' | 'templates' | 'blog' | 'system' | 'modules' | 'ads' | 'messages' | 'seo'>('courses');
   const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
@@ -653,6 +660,10 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
           {unreadMessages > 0 && <span className="bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">{unreadMessages}</span>}
         </button>
         <button onClick={() => setActiveAdminTab('system')} className={`pb-4 px-2 font-bold transition-all ${activeAdminTab === 'system' ? 'text-cyan-500 border-b-2 border-cyan-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>System Info</button>
+        <button onClick={() => setActiveAdminTab('seo')} className={`pb-4 px-2 font-bold transition-all ${activeAdminTab === 'seo' ? 'text-cyan-500 border-b-2 border-cyan-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'} flex items-center gap-2`}>
+          <Search className="w-4 h-4" />
+          SEO
+        </button>
         {isMaster && (
           <button onClick={() => setActiveAdminTab('users')} className={`pb-4 px-2 font-bold transition-all ${activeAdminTab === 'users' ? 'text-cyan-500 border-b-2 border-cyan-500' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>Users</button>
         )}
@@ -1086,6 +1097,7 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
+              { id: 'global_adsense_script', name: 'Global AdSense Activation Script' },
               { id: 'dashboard_top', name: 'Dashboard Top Ad' },
               { id: 'sidebar_bottom', name: 'Sidebar Bottom Ad' },
               { id: 'footer_ad', name: 'Footer Ad' },
@@ -1164,6 +1176,7 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
       )}
 
       {activeAdminTab === 'messages' && <AdminMessagesModule />}
+      {activeAdminTab === 'seo' && <AdminSEOModule />}
       {activeAdminTab === 'system' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -2138,6 +2151,176 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
           </div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function AdminSEOModule() {
+  const [seoConfig, setSeoConfig] = useState<SEOConfig>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, 'seo_config', 'global'), (doc) => {
+      if (doc.exists()) {
+        setSeoConfig(doc.data() as SEOConfig);
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await setDoc(doc(db, 'seo_config', 'global'), {
+        ...seoConfig,
+        updatedAt: serverTimestamp()
+      });
+      setNotification({ message: 'SEO settings saved successfully!', type: 'success' });
+    } catch (error: any) {
+      handleFirestoreError(error, OperationType.WRITE, 'seo_config/global');
+      setNotification({ message: 'Error saving SEO settings: ' + error.message, type: 'error' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-cyan-500" /></div>;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-[var(--text-primary)]">SEO & Verification</h2>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-6 py-2 bg-cyan-500 text-white rounded-xl font-bold hover:bg-cyan-600 transition-all flex items-center gap-2 disabled:opacity-50 shadow-[0_0_15px_rgba(0,243,255,0.4)]"
+        >
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          Save Settings
+        </button>
+      </div>
+
+      {notification && (
+        <div className={cn(
+          "p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2",
+          notification.type === 'success' ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"
+        )}>
+          {notification.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <X className="w-5 h-5" />}
+          <p className="text-sm font-medium">{notification.message}</p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Google Search Console */}
+        <div className="bg-[var(--bg-secondary)] p-6 rounded-3xl border border-[var(--border-color)] neon-border">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-cyan-500/10 rounded-2xl">
+              <Search className="w-6 h-6 text-cyan-500" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">Google Search Console</h3>
+              <p className="text-xs text-[var(--text-secondary)]">Ownership verification for SEO indexing.</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-[var(--text-secondary)] mb-2 tracking-widest">Verification Code (HTML Tag)</label>
+              <input
+                type="text"
+                value={seoConfig.googleVerification || ''}
+                onChange={(e) => setSeoConfig({ ...seoConfig, googleVerification: e.target.value })}
+                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none text-sm"
+                placeholder="e.g. YOUR_VERIFICATION_CODE_HERE"
+              />
+              <p className="mt-2 text-[10px] text-[var(--text-secondary)]">
+                Copy the 'content' value from the meta tag provided by Google Search Console.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Google Analytics */}
+        <div className="bg-[var(--bg-secondary)] p-6 rounded-3xl border border-[var(--border-color)] neon-border">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-indigo-500/10 rounded-2xl">
+              <Sparkles className="w-6 h-6 text-indigo-500" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">Google Analytics</h3>
+              <p className="text-xs text-[var(--text-secondary)]">Track visitor behavior and traffic.</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-[var(--text-secondary)] mb-2 tracking-widest">Measurement ID (G-XXXXXXX)</label>
+              <input
+                type="text"
+                value={seoConfig.googleAnalyticsId || ''}
+                onChange={(e) => setSeoConfig({ ...seoConfig, googleAnalyticsId: e.target.value })}
+                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none text-sm"
+                placeholder="G-XXXXXXXXXX"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Robots.txt */}
+        <div className="bg-[var(--bg-secondary)] p-6 rounded-3xl border border-[var(--border-color)] neon-border">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-amber-500/10 rounded-2xl">
+              <ShieldCheck className="w-6 h-6 text-amber-500" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">Robots.txt</h3>
+              <p className="text-xs text-[var(--text-secondary)]">Instructions for search engine crawlers.</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-[var(--text-secondary)] mb-2 tracking-widest">Content</label>
+              <textarea
+                value={seoConfig.robotsTxt || ''}
+                onChange={(e) => setSeoConfig({ ...seoConfig, robotsTxt: e.target.value })}
+                className="w-full h-32 px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none text-sm font-mono"
+                placeholder="User-agent: *
+Allow: /"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Sitemap */}
+        <div className="bg-[var(--bg-secondary)] p-6 rounded-3xl border border-[var(--border-color)] neon-border">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-emerald-500/10 rounded-2xl">
+              <FileDown className="w-6 h-6 text-emerald-500" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">Sitemap</h3>
+              <p className="text-xs text-[var(--text-secondary)]">Link to your sitemap.xml file.</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-[var(--text-secondary)] mb-2 tracking-widest">Sitemap URL</label>
+              <input
+                type="text"
+                value={seoConfig.sitemapUrl || ''}
+                onChange={(e) => setSeoConfig({ ...seoConfig, sitemapUrl: e.target.value })}
+                className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none text-sm"
+                placeholder="https://yourdomain.com/sitemap.xml"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -112,9 +112,22 @@
         "placementId": { "type": "string" },
         "name": { "type": "string" },
         "isVisible": { "type": "boolean" },
+        "adCode": { "type": "string", "description": "Custom AdSense code snippet" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["placementId", "name", "isVisible"]
+    },
+    "SEOConfig": {
+      "title": "SEO & Verification Configuration",
+      "description": "Global SEO and site verification settings.",
+      "type": "object",
+      "properties": {
+        "googleVerification": { "type": "string" },
+        "googleAnalyticsId": { "type": "string" },
+        "robotsTxt": { "type": "string" },
+        "sitemapUrl": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
@@ -149,6 +162,10 @@
     "/ad_config/{placementId}": {
       "schema": "AdConfig",
       "description": "Global ad placement settings"
+    },
+    "/seo_config/global": {
+      "schema": "SEOConfig",
+      "description": "Global SEO and site verification settings"
     }
   }
 }

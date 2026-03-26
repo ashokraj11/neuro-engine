@@ -250,6 +250,74 @@ function AppContent() {
     };
   }, [user]);
 
+  // Global AdSense Script Injection
+  useEffect(() => {
+    const globalConfig = adConfigs.find(c => c.placementId === 'global_adsense_script');
+    if (globalConfig?.isVisible && globalConfig.adCode) {
+      // Remove existing global script if any to avoid duplicates
+      const existingScript = document.getElementById('global-adsense-script');
+      if (existingScript) existingScript.remove();
+
+      // Create new script element
+      const scriptContainer = document.createElement('div');
+      scriptContainer.id = 'global-adsense-script';
+      scriptContainer.style.display = 'none';
+      
+      // Use Range to parse HTML string into DOM nodes (handles <script> tags)
+      const range = document.createRange();
+      const fragment = range.createContextualFragment(globalConfig.adCode);
+      scriptContainer.appendChild(fragment);
+      
+      document.head.appendChild(scriptContainer);
+    } else {
+      const existingScript = document.getElementById('global-adsense-script');
+      if (existingScript) existingScript.remove();
+    }
+  }, [adConfigs]);
+
+  // SEO & Verification
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, 'seo_config', 'global'), (doc) => {
+      if (doc.exists()) {
+        const data = doc.data();
+        
+        // Google Search Console Verification
+        if (data.googleVerification) {
+          let meta = document.querySelector('meta[name="google-site-verification"]');
+          if (!meta) {
+            meta = document.createElement('meta');
+            meta.setAttribute('name', 'google-site-verification');
+            document.head.appendChild(meta);
+          }
+          meta.setAttribute('content', data.googleVerification);
+        }
+
+        // Google Analytics
+        if (data.googleAnalyticsId) {
+          const scriptId = 'google-analytics-script';
+          if (!document.getElementById(scriptId)) {
+            const script1 = document.createElement('script');
+            script1.id = scriptId;
+            script1.async = true;
+            script1.src = `https://www.googletagmanager.com/gtag/js?id=${data.googleAnalyticsId}`;
+            document.head.appendChild(script1);
+
+            const script2 = document.createElement('script');
+            script2.id = `${scriptId}-config`;
+            script2.innerHTML = `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${data.googleAnalyticsId}');
+            `;
+            document.head.appendChild(script2);
+          }
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {

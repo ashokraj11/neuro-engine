@@ -3,6 +3,7 @@ import { cn } from '../lib/utils';
 
 interface AdSenseProps {
   adSlot: string;
+  adClient?: string;
   adFormat?: 'auto' | 'fluid' | 'rectangle';
   fullWidthResponsive?: boolean;
   className?: string;
@@ -17,6 +18,7 @@ declare global {
 
 export function AdSense({ 
   adSlot, 
+  adClient = "ca-pub-XXXXXXXXXXXXXXXX",
   adFormat = 'auto', 
   fullWidthResponsive = true,
   className,
@@ -78,7 +80,7 @@ export function AdSense({
       if (resizeObserver) resizeObserver.disconnect();
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, []);
+  }, [adCode, adSlot, adClient, adFormat, fullWidthResponsive]);
 
   return (
     <div 
@@ -93,7 +95,7 @@ export function AdSense({
           <ins
             className="adsbygoogle"
             style={{ display: 'block', width: '100%', minWidth: '100px' }}
-            data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+            data-ad-client={adClient}
             data-ad-slot={adSlot}
             data-ad-format={adFormat}
             data-full-width-responsive={fullWidthResponsive ? "true" : "false"}

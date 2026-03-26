@@ -25,7 +25,7 @@ export function BrandVoiceToggle({ enabled, onToggle, disabled }: BrandVoiceTogg
           />
         </button>
         <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">
-          Brand Voice
+          Brand & Avatar DNA
         </span>
       </div>
       {disabled && (

@@ -62,17 +62,20 @@ const getAudiencePrompt = (audienceType: AudienceType) => {
 };
 
 const getAvatarPrompt = (brandVoice?: BrandVoice) => {
-  if (!brandVoice || !brandVoice.name) return '';
+  if (!brandVoice) return '';
+  const hasAvatarData = brandVoice.name || brandVoice.description || brandVoice.fears || brandVoice.desires || brandVoice.jobsToBeDone || brandVoice.vocabulary || brandVoice.psychologicalTriggers;
+  if (!hasAvatarData) return '';
+  
   return `
     CUSTOMER AVATAR DNA (THE TARGET):
-    - Name: ${brandVoice.name}
-    - Description: ${brandVoice.description}
-    - Deep-Seated Fears: ${brandVoice.fears}
-    - Secret Desires: ${brandVoice.desires}
-    - Jobs to be Done: ${brandVoice.jobsToBeDone}
-    - Specific Vocabulary: ${brandVoice.vocabulary}
-    - Psychological Triggers: ${brandVoice.psychologicalTriggers}
-    - INSTRUCTION: Tailor ALL content to resonate deeply with this specific persona. Use their vocabulary and hit their specific psychological triggers.
+    ${brandVoice.name ? `- Name: ${brandVoice.name}` : ''}
+    ${brandVoice.description ? `- Description: ${brandVoice.description}` : ''}
+    ${brandVoice.fears ? `- Deep-Seated Fears: ${brandVoice.fears}` : ''}
+    ${brandVoice.desires ? `- Secret Desires: ${brandVoice.desires}` : ''}
+    ${brandVoice.jobsToBeDone ? `- Jobs to be Done: ${brandVoice.jobsToBeDone}` : ''}
+    ${brandVoice.vocabulary ? `- Specific Vocabulary: ${brandVoice.vocabulary}` : ''}
+    ${brandVoice.psychologicalTriggers ? `- Psychological Triggers: ${brandVoice.psychologicalTriggers}` : ''}
+    - INSTRUCTION: Tailor ALL content to resonate deeply with this specific persona. Use their vocabulary and hit their specific psychological triggers. This is CRITICAL for high conversion.
   `;
 };
 

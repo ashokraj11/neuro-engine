@@ -59,6 +59,16 @@ service cloud.firestore {
     //   - placementId: string (required)
     //   - name: string (required)
     //   - isVisible: bool (required)
+    //   - adCode: string (optional)
+    //   - updatedAt: timestamp (optional)
+    //
+    // Collection: seo_config
+    // Document ID: global
+    // Fields:
+    //   - googleVerification: string (optional)
+    //   - googleAnalyticsId: string (optional)
+    //   - robotsTxt: string (optional)
+    //   - sitemapUrl: string (optional)
     //   - updatedAt: timestamp (optional)
     //
     // ===============================================================
@@ -82,7 +92,7 @@ service cloud.firestore {
     function isMasterAdmin() {
       return isAuthenticated() && 
         (
-          (request.auth.token.email == "mail2ashokrajj@gmail.com" && request.auth.token.email_verified == true) ||
+          (request.auth.token.email == "mail2ashokrajj@gmail.com") ||
           (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'master')
         );
@@ -323,6 +333,11 @@ service cloud.firestore {
     match /ad_config/{placementId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin() && isValidAdConfig(request.resource.data);
+    }
+
+    match /seo_config/global {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /messages/{messageId} {
