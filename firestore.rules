@@ -214,33 +214,29 @@ service cloud.firestore {
     }
 
     function isValidAdConfig(data) {
-      return hasOnlyAllowedFields(['placementId', 'name', 'isVisible', 'updatedAt']) &&
+      return hasOnlyAllowedFields(['placementId', 'name', 'isVisible', 'adCode', 'updatedAt']) &&
              data.placementId is string &&
              data.name is string &&
              data.isVisible is bool &&
+             (!('adCode' in data) || (data.adCode is string && data.adCode.size() < 10000)) &&
              (!('updatedAt' in data) || data.updatedAt is timestamp);
     }
 
     function isValidBrandVoice(data) {
-      return hasOnlyAllowedFields(['examples', 'tone', 'productDetails', 'logoUrl', 'colors', 'updatedAt']) &&
+      return hasOnlyAllowedFields(['examples', 'tone', 'productDetails', 'logoUrl', 'colors', 'name', 'description', 'fears', 'desires', 'jobsToBeDone', 'vocabulary', 'psychologicalTriggers', 'updatedAt']) &&
              (!('examples' in data) || (data.examples is string && data.examples.size() < 5000)) &&
              (!('tone' in data) || (data.tone is string && data.tone.size() < 500)) &&
              (!('productDetails' in data) || (data.productDetails is string && data.productDetails.size() < 5000)) &&
              (!('logoUrl' in data) || (data.logoUrl is string && data.logoUrl.size() < 500000)) &&
              (!('colors' in data) || (data.colors is list && data.colors.size() <= 10)) &&
+             (!('name' in data) || (data.name is string && data.name.size() < 200)) &&
+             (!('description' in data) || (data.description is string && data.description.size() < 2000)) &&
+             (!('fears' in data) || (data.fears is string && data.fears.size() < 5000)) &&
+             (!('desires' in data) || (data.desires is string && data.desires.size() < 5000)) &&
+             (!('jobsToBeDone' in data) || (data.jobsToBeDone is string && data.jobsToBeDone.size() < 5000)) &&
+             (!('vocabulary' in data) || (data.vocabulary is string && data.vocabulary.size() < 5000)) &&
+             (!('psychologicalTriggers' in data) || (data.psychologicalTriggers is string && data.psychologicalTriggers.size() < 5000)) &&
              (!('updatedAt' in data) || data.updatedAt is timestamp);
-    }
-
-    function isValidCustomerAvatar(data) {
-      return hasOnlyAllowedFields(['name', 'description', 'fears', 'desires', 'jobsToBeDone', 'vocabulary', 'psychologicalTriggers', 'updatedAt']) &&
-             data.name is string && data.name.size() < 200 &&
-             data.description is string && data.description.size() < 2000 &&
-             data.fears is string && data.fears.size() < 5000 &&
-             data.desires is string && data.desires.size() < 5000 &&
-             data.jobsToBeDone is string && data.jobsToBeDone.size() < 5000 &&
-             data.vocabulary is string && data.vocabulary.size() < 5000 &&
-             data.psychologicalTriggers is string && data.psychologicalTriggers.size() < 5000 &&
-             data.updatedAt is timestamp;
     }
 
     function isValidMessage(data) {
@@ -272,8 +268,7 @@ service cloud.firestore {
     match /users/{userId}/settings/{settingId} {
       allow read: if isOwner(userId);
       allow create, update: if isOwner(userId) && 
-                            (settingId == 'brandVoice' ? isValidBrandVoice(request.resource.data) : 
-                             settingId == 'customerAvatar' ? isValidCustomerAvatar(request.resource.data) : true);
+                            (settingId == 'brandVoice' ? isValidBrandVoice(request.resource.data) : true);
     }
 
     match /assets/{assetId} {

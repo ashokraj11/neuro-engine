@@ -6,6 +6,7 @@ interface AdSenseProps {
   adFormat?: 'auto' | 'fluid' | 'rectangle';
   fullWidthResponsive?: boolean;
   className?: string;
+  adCode?: string;
 }
 
 declare global {
@@ -18,13 +19,26 @@ export function AdSense({
   adSlot, 
   adFormat = 'auto', 
   fullWidthResponsive = true,
-  className 
+  className,
+  adCode
 }: AdSenseProps) {
   const adRef = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
 
   useEffect(() => {
-    // Only initialize once per component instance
+    if (adCode && adRef.current) {
+      // Handle custom ad code
+      const container = adRef.current.querySelector('.custom-ad-container');
+      if (container) {
+        container.innerHTML = '';
+        const range = document.createRange();
+        const documentFragment = range.createContextualFragment(adCode);
+        container.appendChild(documentFragment);
+      }
+      return;
+    }
+
+    // Only initialize AdSense once per component instance
     if (initialized.current) return;
 
     let timeoutId: NodeJS.Timeout;
@@ -73,14 +87,18 @@ export function AdSense({
     >
       <span className="text-[6px] font-bold text-zinc-600 uppercase tracking-widest mb-0.5">Advertisement</span>
       <div className="w-full min-h-[25px] flex items-center justify-center">
-        <ins
-          className="adsbygoogle"
-          style={{ display: 'block', width: '100%', minWidth: '100px' }}
-          data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-          data-ad-slot={adSlot}
-          data-ad-format={adFormat}
-          data-full-width-responsive={fullWidthResponsive ? "true" : "false"}
-        />
+        {adCode ? (
+          <div className="custom-ad-container w-full flex flex-col items-center justify-center" />
+        ) : (
+          <ins
+            className="adsbygoogle"
+            style={{ display: 'block', width: '100%', minWidth: '100px' }}
+            data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+            data-ad-slot={adSlot}
+            data-ad-format={adFormat}
+            data-full-width-responsive={fullWidthResponsive ? "true" : "false"}
+          />
+        )}
       </div>
     </div>
   );

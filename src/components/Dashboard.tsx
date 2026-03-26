@@ -21,6 +21,7 @@ interface AdConfig {
   placementId: string;
   isVisible: boolean;
   name: string;
+  adCode?: string;
 }
 
 export function Dashboard({ onNavigate, adConfigs }: { 
@@ -82,6 +83,7 @@ export function Dashboard({ onNavigate, adConfigs }: {
         <AdSense 
           adSlot="DASHBOARD_TOP_AD" 
           className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-4 rounded-xl my-2"
+          adCode={adConfigs.find(c => c.placementId === 'dashboard_top')?.adCode}
         />
       )}
 

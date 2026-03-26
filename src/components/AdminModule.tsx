@@ -70,6 +70,7 @@ interface AdConfig {
   placementId: string;
   isVisible: boolean;
   name: string;
+  adCode?: string;
 }
 
 export function AdminModule({ isMaster }: { isMaster: boolean }) {
@@ -1087,31 +1088,36 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
             {[
               { id: 'dashboard_top', name: 'Dashboard Top Ad' },
               { id: 'sidebar_bottom', name: 'Sidebar Bottom Ad' },
-              { id: 'footer_ad', name: 'Footer Ad' }
+              { id: 'footer_ad', name: 'Footer Ad' },
+              { id: 'blog_sidebar', name: 'Blog Sidebar Ad' },
+              { id: 'generator_bottom', name: 'Generator Bottom Ad' }
             ].map((placement) => {
               const config = adConfigs.find(c => c.placementId === placement.id) || {
                 placementId: placement.id,
                 isVisible: true,
-                name: placement.name
+                name: placement.name,
+                adCode: ''
               };
 
-              const toggleAdVisibility = async () => {
+              const updateAdConfig = async (updates: Partial<AdConfig>) => {
                 try {
                   await setDoc(doc(db, 'ad_config', placement.id), {
                     placementId: placement.id,
                     name: placement.name,
-                    isVisible: !config.isVisible,
+                    isVisible: config.isVisible,
+                    adCode: config.adCode || '',
+                    ...updates,
                     updatedAt: serverTimestamp()
                   });
-                  setNotification({ message: `${placement.name} visibility updated!`, type: 'success' });
+                  setNotification({ message: `${placement.name} updated!`, type: 'success' });
                 } catch (error: any) {
                   handleFirestoreError(error, OperationType.WRITE, `ad_config/${placement.id}`);
                 }
               };
 
               return (
-                <div key={placement.id} className="bg-[var(--bg-secondary)] p-6 rounded-2xl border border-[var(--border-color)] neon-border flex flex-col justify-between h-full">
-                  <div className="flex items-center gap-4 mb-4">
+                <div key={placement.id} className="bg-[var(--bg-secondary)] p-6 rounded-2xl border border-[var(--border-color)] neon-border flex flex-col gap-4">
+                  <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-500 shadow-[0_0_10px_rgba(0,243,255,0.2)]">
                       <ImageIcon className="w-5 h-5" />
                     </div>
@@ -1119,6 +1125,16 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
                       <h4 className="font-bold text-[var(--text-primary)]">{placement.name}</h4>
                       <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">{placement.id}</p>
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase font-bold text-[var(--text-secondary)] tracking-widest">Ad Code Snippet</label>
+                    <textarea
+                      value={config.adCode || ''}
+                      onChange={(e) => updateAdConfig({ adCode: e.target.value })}
+                      className="w-full h-24 px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none text-[10px] font-mono"
+                      placeholder="Paste <script> and <div> here..."
+                    />
                   </div>
                   
                   <div className="flex items-center justify-between pt-4 border-t border-[var(--border-color)]">
@@ -1128,7 +1144,7 @@ export function AdminModule({ isMaster }: { isMaster: boolean }) {
                       </span>
                     </span>
                     <button
-                      onClick={toggleAdVisibility}
+                      onClick={() => updateAdConfig({ isVisible: !config.isVisible })}
                       className={cn(
                         "w-12 h-6 rounded-full transition-all relative",
                         config.isVisible ? "bg-cyan-500" : "bg-gray-600"

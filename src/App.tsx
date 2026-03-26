@@ -48,6 +48,7 @@ interface AdConfig {
   placementId: string;
   isVisible: boolean;
   name: string;
+  adCode?: string;
 }
 
 type Module = 'dashboard' | 'niche' | 'blog' | 'social-media' | 'reels' | 'ads' | 'email' | 'whatsapp' | 'landing' | 'sales-funnel' | 'lead-magnet' | 'learning' | 'admin' | 'bridge-page' | 'offer-angle' | 'ad-policy' | 'competitor-intelligence' | 'brand-voice' | 'omnichannel' | 'privacy-policy' | 'terms-conditions' | 'contact-us';
@@ -646,6 +647,7 @@ function AppContent() {
                 adFormat="rectangle" 
                 fullWidthResponsive={false}
                 className="my-2 p-2 rounded-xl"
+                adCode={adConfigs.find(c => c.placementId === 'sidebar_bottom')?.adCode}
               />
             )}
           </div>
@@ -728,37 +730,50 @@ function AppContent() {
                   }} 
                 />
               )}
-              {activeModule === 'blog' && <BlogGenerator isAdmin={isAdmin} />}
-              {activeModule === 'social-media' && <SocialMediaPostGenerator isAdmin={isAdmin} />}
-              {activeModule === 'reels' && <ReelsGenerator isAdmin={isAdmin} />}
-              {activeModule === 'ads' && <AdsGenerator isAdmin={isAdmin} />}
-              {activeModule === 'email' && <EmailGenerator isAdmin={isAdmin} />}
-              {activeModule === 'whatsapp' && <WhatsappGenerator isAdmin={isAdmin} />}
-              {activeModule === 'landing' && <LandingPageGenerator isAdmin={isAdmin} />}
-              {activeModule === 'sales-funnel' && <SalesFunnelGenerator isAdmin={isAdmin} />}
-              {activeModule === 'niche' && <NicheGenerator isAdmin={isAdmin} />}
-              {activeModule === 'lead-magnet' && <LeadMagnetGenerator isAdmin={isAdmin} />}
+              {activeModule === 'blog' && <BlogGenerator />}
+              {activeModule === 'social-media' && <SocialMediaPostGenerator />}
+              {activeModule === 'reels' && <ReelsGenerator />}
+              {activeModule === 'ads' && <AdsGenerator />}
+              {activeModule === 'email' && <EmailGenerator />}
+              {activeModule === 'whatsapp' && <WhatsappGenerator />}
+              {activeModule === 'landing' && <LandingPageGenerator />}
+              {activeModule === 'sales-funnel' && <SalesFunnelGenerator />}
+              {activeModule === 'niche' && <NicheGenerator />}
+              {activeModule === 'lead-magnet' && <LeadMagnetGenerator />}
               {activeModule === 'omnichannel' && <OmnichannelCampaignGenerator />}
-              {activeModule === 'bridge-page' && <BridgePageGenerator isAdmin={isAdmin} />}
-              {activeModule === 'offer-angle' && <OfferAngleIntelligence isAdmin={isAdmin} />}
-              {activeModule === 'ad-policy' && <AdPolicyChecker isAdmin={isAdmin} />}
-              {activeModule === 'competitor-intelligence' && <CompetitorIntelligence isAdmin={isAdmin} />}
+              {activeModule === 'bridge-page' && <BridgePageGenerator />}
+              {activeModule === 'offer-angle' && <OfferAngleIntelligence />}
+              {activeModule === 'ad-policy' && <AdPolicyChecker />}
+              {activeModule === 'competitor-intelligence' && <CompetitorIntelligence />}
               {activeModule === 'brand-voice' && <BrandVoiceManager />}
               {activeModule === 'privacy-policy' && <PrivacyPolicy />}
               {activeModule === 'terms-conditions' && <TermsAndConditions />}
               {activeModule === 'contact-us' && <ContactUs />}
               {activeModule === 'learning' && (
-                <LearningModule initialTab={dashboardNavState?.tab as any} />
+                <LearningModule 
+                  initialTab={dashboardNavState?.tab as any} 
+                  adConfigs={adConfigs}
+                />
               )}
               {activeModule === 'admin' && <AdminModule isMaster={isMaster} />}
             </motion.div>
           </AnimatePresence>
+
+          {/* Generator Bottom Ad Slot */}
+          {generatorModules.some(m => m.id === activeModule) && (adConfigs.find(c => c.placementId === 'generator_bottom')?.isVisible !== false) && (
+            <AdSense 
+              adSlot="GENERATOR_BOTTOM_AD" 
+              className="mt-6 bg-[var(--bg-secondary)] border border-[var(--border-color)] p-4 rounded-xl"
+              adCode={adConfigs.find(c => c.placementId === 'generator_bottom')?.adCode}
+            />
+          )}
 
           {/* Footer Ad Slot */}
           {activeModule !== 'admin' && (adConfigs.find(c => c.placementId === 'footer_ad')?.isVisible !== false) && (
             <AdSense 
               adSlot="FOOTER_AD_SLOT" 
               className="mt-6 bg-[var(--bg-secondary)] border border-[var(--border-color)] p-4 rounded-xl"
+              adCode={adConfigs.find(c => c.placementId === 'footer_ad')?.adCode}
             />
           )}
           

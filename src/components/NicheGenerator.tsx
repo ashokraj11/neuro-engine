@@ -8,14 +8,11 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion } from 'motion/react';
 import { BrandVoiceToggle } from './BrandVoiceToggle';
-import { AudienceSelector } from './AudienceSelector';
-import { AudienceType } from '../services/geminiService';
 
 export function NicheGenerator() {
   const [formData, setFormData] = useState({
     url: '',
-    productDetails: '',
-    audienceType: 'none' as AudienceType
+    productDetails: ''
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -81,8 +78,7 @@ export function NicheGenerator() {
       const data = await geminiService.generateNicheAndPersona({
         ...formData,
         brandVoice: useBrandVoice ? brandVoice || undefined : undefined,
-        userApiKey,
-        audienceType: formData.audienceType
+        userApiKey
       });
       setResult(data);
     } catch (error: any) {
@@ -134,11 +130,6 @@ export function NicheGenerator() {
               rows={4}
             />
           </div>
-
-          <AudienceSelector
-            value={formData.audienceType}
-            onChange={(val) => setFormData({ ...formData, audienceType: val })}
-          />
 
           {auth.currentUser && (
             <BrandVoiceToggle

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
+import { AdSense } from './AdSense';
 import { collection, onSnapshot, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Play, BookOpen, Clock, Download, Users, Star, ArrowRight, Loader2, FileText, Award, Zap, Wrench, Newspaper, FileDown, ExternalLink, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -44,7 +45,14 @@ interface BlogPost {
 
 type TabType = 'video' | 'tools' | 'templates' | 'blog';
 
-export function LearningModule({ initialTab }: { initialTab?: TabType }) {
+interface AdConfig {
+  placementId: string;
+  isVisible: boolean;
+  name: string;
+  adCode?: string;
+}
+
+export function LearningModule({ initialTab, adConfigs }: { initialTab?: TabType, adConfigs?: AdConfig[] }) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [tools, setTools] = useState<Tool[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -370,32 +378,44 @@ export function LearningModule({ initialTab }: { initialTab?: TabType }) {
             </div>
           )}
 
-          {activeTab === 'blog' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {blogPosts.map((post) => (
-                <div 
-                  key={post.id} 
-                  className="group cursor-pointer"
-                  onClick={() => setSelectedBlogPost(post)}
-                >
-                  <div className="aspect-video rounded-3xl overflow-hidden mb-6 neon-border">
-                    <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+              {activeTab === 'blog' && (
+                <div className="space-y-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {blogPosts.map((post) => (
+                      <div 
+                        key={post.id} 
+                        className="group cursor-pointer"
+                        onClick={() => setSelectedBlogPost(post)}
+                      >
+                        <div className="aspect-video rounded-3xl overflow-hidden mb-6 neon-border">
+                          <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3 text-xs font-bold text-cyan-500 uppercase tracking-widest">
+                            <span>{post.author}</span>
+                          </div>
+                          <h4 className="text-2xl font-bold group-hover:text-cyan-500 transition-colors">{post.title}</h4>
+                          <div className="text-[var(--text-secondary)] line-clamp-3 text-sm prose prose-invert prose-sm max-w-none prose-a:text-cyan-500 hover:prose-a:text-cyan-400 prose-a:no-underline">
+                            <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{post.content}</Markdown>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm font-bold pt-4 text-cyan-500 group-hover:gap-3 transition-all">
+                            Read Article <ExternalLink className="w-4 h-4" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3 text-xs font-bold text-cyan-500 uppercase tracking-widest">
-                      <span>{post.author}</span>
-                    </div>
-                    <h4 className="text-2xl font-bold group-hover:text-cyan-500 transition-colors">{post.title}</h4>
-                    <div className="text-[var(--text-secondary)] line-clamp-3 text-sm prose prose-invert prose-sm max-w-none prose-a:text-cyan-500 hover:prose-a:text-cyan-400 prose-a:no-underline">
-                      <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{post.content}</Markdown>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm font-bold pt-4 text-cyan-500 group-hover:gap-3 transition-all">
-                      Read Article <ExternalLink className="w-4 h-4" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {blogPosts.length === 0 && (
+
+                  {/* Blog Sidebar Ad */}
+                  {adConfigs && (adConfigs.find(c => c.placementId === 'blog_sidebar')?.isVisible !== false) && (
+                    <AdSense 
+                      adSlot="BLOG_SIDEBAR_AD" 
+                      className="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-6 rounded-3xl neon-border"
+                      adCode={adConfigs.find(c => c.placementId === 'blog_sidebar')?.adCode}
+                    />
+                  )}
+
+                  {blogPosts.length === 0 && (
                 <div className="col-span-full text-center py-20 bg-[var(--bg-secondary)] rounded-3xl border border-dashed border-[var(--border-color)]">
                   <Newspaper className="w-12 h-12 text-[var(--text-secondary)] mx-auto mb-4 opacity-20" />
                   <p className="text-[var(--text-secondary)]">No blog posts available yet.</p>

@@ -85,8 +85,8 @@
       "required": ["title", "date", "author", "imageUrl", "content", "createdAt"]
     },
     "BrandVoice": {
-      "title": "Brand Voice DNA",
-      "description": "Stores user's brand voice settings.",
+      "title": "Brand Voice & Customer Avatar DNA",
+      "description": "Stores user's brand voice and target customer persona settings.",
       "type": "object",
       "properties": {
         "tone": { "type": "string" },
@@ -94,21 +94,13 @@
         "productDetails": { "type": "string" },
         "logoUrl": { "type": "string" },
         "colors": { "type": "array", "items": { "type": "string" } },
-        "updatedAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "CustomerAvatar": {
-      "title": "Customer Avatar DNA",
-      "description": "Stores user's target customer persona.",
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "description": { "type": "string" },
-        "fears": { "type": "string" },
-        "desires": { "type": "string" },
-        "jobsToBeDone": { "type": "string" },
-        "vocabulary": { "type": "string" },
-        "psychologicalTriggers": { "type": "string" },
+        "name": { "type": "string", "description": "Persona Name" },
+        "description": { "type": "string", "description": "Target Audience Description" },
+        "fears": { "type": "string", "description": "Deep-Seated Fears" },
+        "desires": { "type": "string", "description": "Secret Desires" },
+        "jobsToBeDone": { "type": "string", "description": "Jobs to be Done" },
+        "vocabulary": { "type": "string", "description": "Specific Vocabulary" },
+        "psychologicalTriggers": { "type": "string", "description": "Psychological Triggers" },
         "updatedAt": { "type": "string", "format": "date-time" }
       }
     },
@@ -132,11 +124,7 @@
     },
     "/users/{userId}/settings/brandVoice": {
       "schema": "BrandVoice",
-      "description": "User's brand voice settings"
-    },
-    "/users/{userId}/settings/customerAvatar": {
-      "schema": "CustomerAvatar",
-      "description": "User's customer avatar settings"
+      "description": "User's brand voice and customer avatar settings"
     },
     "/assets/{assetId}": {
       "schema": "MarketingAsset",

@@ -564,7 +564,6 @@ export const geminiService = {
     url?: string;
     productDetails?: string;
     brandVoice?: BrandVoice;
-    audienceType?: AudienceType;
     userApiKey?: string;
   }) {
     const ai = getAI(params.userApiKey);
@@ -576,8 +575,6 @@ export const geminiService = {
       Analyze the provided product details: "${params.productDetails || 'Not provided'}" and the sales page URL: "${params.url || 'Not provided'}".
       
       Suggest a Niche, a Sub-niche, and generate a Full Detailed Buyer Persona.
-
-      ${getAudiencePrompt(params.audienceType || 'none')}
 
       ${getAvatarPrompt(params.brandVoice)}
 
@@ -905,16 +902,14 @@ export const geminiService = {
     url: string;
     productDetails: string;
     userApiKey?: string;
-    sceneCount?: number;
     brandVoice?: BrandVoice;
     psychTrigger?: string;
     audienceType?: AudienceType;
   }) {
     const ai = getAI(params.userApiKey);
-    const count = params.sceneCount || 5;
     const prompt = `
       ROLE
-      You are a short-form video viral strategist and master of faceless video content.
+      You are a world-class short-form video viral strategist and master of high-converting Reels/TikTok content.
       Analyze the product: ${params.productDetails} and the provided Sales Page URL: ${params.url}
       
       ${getAudiencePrompt(params.audienceType || 'none')}
@@ -935,17 +930,19 @@ export const geminiService = {
       ` : ''}
       
       TASK
-      Create a high-converting faceless reel script broken down into ${count} scenes for a 9:16 vertical video.
-      Structure:
-      - Scene 1: Hook (Stop the scroll)
-      - Scenes 2-${count - 1}: Problem, Agitation, Solution (Build desire)
-      - Scene ${count}: CTA (Drive action)
-      
-      For each scene, provide:
-      - Visual Description: Detailed description for an AI image generator.
-      - Voiceover Text: Engaging, human-like narration.
-      - On-screen Caption: Short, punchy text overlay.
-      
+      Generate 10 distinct, high-converting 30-second Reel scripts using different psychological angles.
+      Each script must follow a viral structure:
+      1. Hook (0-3 seconds): Stop the scroll instantly.
+      2. Body (3-25 seconds): Deliver value, agitate the problem, or show the solution.
+      3. CTA (25-30 seconds): Clear, direct call to action.
+
+      For each of the 10 scripts, provide:
+      - angle: The psychological approach used (e.g., "The Negative Hook", "The Authority Proof", "The Curiosity Gap").
+      - hook: The opening line or visual text.
+      - body: The main script content.
+      - cta: The final call to action.
+      - visualInstructions: Brief notes on what should be shown on screen.
+
       Return as structured JSON.
     `;
 
@@ -964,12 +961,13 @@ export const geminiService = {
           items: {
             type: Type.OBJECT,
             properties: {
-              scene: { type: Type.STRING },
-              visualPrompt: { type: Type.STRING },
-              voiceover: { type: Type.STRING },
-              caption: { type: Type.STRING },
+              angle: { type: Type.STRING },
+              hook: { type: Type.STRING },
+              body: { type: Type.STRING },
+              cta: { type: Type.STRING },
+              visualInstructions: { type: Type.STRING },
             },
-            required: ["scene", "visualPrompt", "voiceover", "caption"],
+            required: ["angle", "hook", "body", "cta", "visualInstructions"],
           },
         },
       },
